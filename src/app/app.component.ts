@@ -43,9 +43,12 @@ export class AppComponent implements OnInit {
         self.toastr.error('Selected File(s) size is greater than the limit!');
       }
 
-      self.dicomParserService.getPatientList(files).subscribe(response => {
-        console.log("Reached");
+      self.dicomParserService.getDicomAttributes().subscribe(dicomAttributes => {
+        self.dicomParserService.getPatientList(files, dicomAttributes).subscribe(patientList => {
+          console.log("Reached", patientList);
+        });
       });
+      
       console.log(files);
       console.debug('filesAdded', event);
     });

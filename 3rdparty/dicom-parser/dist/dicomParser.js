@@ -16313,7 +16313,6 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
  */
 
 function parseDicom(byteArray, options) {
-  console.log("Test");
   if (byteArray === undefined) {
     throw 'dicomParser.parseDicom: missing required parameter \'byteArray\'';
   }

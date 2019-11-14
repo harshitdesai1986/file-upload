@@ -1,5 +1,7 @@
 import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { Observable, Subject, forkJoin } from 'rxjs';
+import * as _ from "lodash";
 
 import { FileReaderPoolService } from './file-reader-pool.service';
 
@@ -9,6 +11,7 @@ import * as dicomCharSet from '../../3rdparty/dicom-character-set/dicom-characte
 // 5GB Upload Limit
 const UPLOAD_LIMIT: Number = 5368709120;
 const DICOMDIR = 'DICOMDIR';
+const dicomAttributesURL = '/assets/dicomAttributes.json';
 
 
 @Injectable({
@@ -17,8 +20,18 @@ const DICOMDIR = 'DICOMDIR';
 export class DicomParserService {
 
   private subject = new Subject<any>();
+  private validTransferSyntaxUid: any;
+  private validSopClassUid: any;
 
-  constructor(private fileReaderPoolService: FileReaderPoolService) { }
+  constructor(private fileReaderPoolService: FileReaderPoolService, private http: HttpClient) { }
+
+  /**
+   * Makes a GET call to read dicom attributes JSON file and returns response
+   * @returns dicomAttributes from JSON file
+   */
+  getDicomAttributes() {
+    return this.http.get(dicomAttributesURL);
+  }
 
   /**
    * Validates the total size of all the browsed files and returns false on exeeding the defined limit
@@ -95,6 +108,237 @@ export class DicomParserService {
     };
   }
 
+  /**
+   * Sets valid SOP Class UID
+   * @param sopClassUid SOP Class UID from Dicom Attributes list
+   */
+  private setValidSopClassUid = function (sopClassUid) {
+    this.validSopClassUid = sopClassUid;
+  }
+
+  /**
+   * Sets valid Transfer Syntax UID
+   * @param transferSyntaxUid Transfer Syntax UID from Dicom Attributes list
+   */
+  private setValidTransferSyntaxUid = function (transferSyntaxUid) {
+    this.validTransferSyntaxUid = transferSyntaxUid;
+  }
+
+  /**
+   * Reads data set  from file byte array
+   * @param metaHeaderDataSet Parsed data set of a dicom file
+   * @param byteArray byte Array of a dicom file
+   * @returns Transfer syntax uid
+   */
+  private readTransferSyntax(metaHeaderDataSet, byteArray) {
+    if (metaHeaderDataSet.elements.x00020010 === undefined) {
+        return false;
+    }
+    let transferSyntaxElement = metaHeaderDataSet.elements.x00020010;
+    let transferSyntaxUid = dicomParser.readFixedString(byteArray, transferSyntaxElement.dataOffset, transferSyntaxElement.length);
+    return transferSyntaxUid;
+  }
+
+  /**
+   * Checks mandatory dicom tag
+   * @param patient Patient data of the parsed dicom file
+   * @param study Study data of the parsed dicom file
+   * @returns false, if any of mandatory dicom tag is missing
+   */
+  private checkDicomMandatoryFields(patient, study) {
+    var isValid = true;
+    if (!patient.classUid || !_.has(this.validSopClassUid, patient.classUid)) {
+        isValid = false;
+    } if (!patient.instanceUid) {
+        isValid = false;
+    } if (!study.modality || !study.modality.length) {
+        isValid = false;
+    } if (!study.studyInstanceUid) {
+        isValid = false;
+    } if (!study.seriesInstanceUid) {
+        isValid = false;
+    } if (!study.transferSyntaxUid) {
+        isValid = false;
+    }
+    return isValid;
+  }
+
+  /**
+   * Iterates through each attribue and prepares an object
+   * @param original Original object passed to the function
+   * @param attrs List of attributes passed to the function
+   * @returns Reformed Object
+   */
+  private copyObject(original, attrs) {
+    var obj = {};
+    attrs.forEach(function (attr) {
+        obj[attr] = original[attr];
+    });
+    return obj;
+  }
+
+  /**
+   * Returns the reformed patient data
+   * @param patient A patient data
+   */
+  private copyPatient(patient) {
+    return this.copyObject(patient, [
+        'name',
+        'fhirName',
+        'id',
+        'gender',
+        'age',
+        'dob',
+        'classUid',
+        'instanceUid',
+        'collapsed',
+        'isSelected',
+        'selectAll'
+    ]);
+  }
+
+  /**
+   * Extracts patient details from dicom file
+   */
+  private getUniquePatientDetails = function (patient) {
+    return (patient ? patient.name + patient.gender + patient.dob + '' : '').toLowerCase();
+  }
+
+  /**
+   * Converts date into UTC date and returns it in milliseconds
+   * @param date date string in "yyyy.MM.dd" or "yyyymmdd" format
+   * @returns {Number|number}
+   */
+  private convertDateToUTC(date) {
+    if (date instanceof Date) {
+        date = date.toJSON().slice(0, 10).replace(/-/g, '');
+    }
+    let formattedDate = date && (String(date).indexOf('.') > -1) ? date.replace(/\./g, '') : date;
+    //formattedDate yyyymmdd;
+    if (formattedDate.length === 8) {
+        let year = formattedDate.slice(0, 4),
+            // UTC allows months from 0-11, thus month - 1
+            month = Number(formattedDate.slice(4, 6)) - 1,
+            day = formattedDate.slice(6, 8);
+        return Date.UTC(year, month, day);
+    } else {
+        return formattedDate;
+    }
+  }
+
+  /**
+   * Adds the patient details to patient list
+   * @param patientList List of patients containing patients retrieved from Dicom files
+   * @param patient Patient retrieved from current Dicom file
+   */
+  private getPatientFromPatientList(patientList, patient) {
+    patient = this.copyPatient(patient);
+
+    let mergeId = this.getUniquePatientDetails(patient);
+
+    if (patient.dob) {
+        patient.dob = this.convertDateToUTC(patient.dob);
+    }
+
+    //patient.fhirName = getFhirName(patient.fhirName);
+
+    if (!patientList[mergeId]) {
+        patient.studyList = [];
+        patientList[mergeId] = patient;
+    }
+
+    return patientList[mergeId];
+  }
+
+  /**
+   * Returns the reformed study data
+   * @param study A study data
+   */
+  private copyStudy(study) {
+    return this.copyObject(study, [
+        'id',
+        'description',
+        'studyDate',
+        'studyTime',
+        'modality',
+        'accessionNumber',
+        'studyInstanceUid',
+        'seriesInstanceUid',
+        'seriesIds',
+        'isSelected'
+    ]);
+  }
+
+  /**
+   * Adds the study details to stydy list
+   * @param studyList List of studies containing studies retrieved from Dicom files
+   * @param study Study retrieved from current Dicom file
+   */
+  private getStudyFromStudyList(studyList, study) {
+    study = this.copyStudy(study);
+
+    if (study.studyDate) {
+        study.studyDate = this.convertDateToUTC(study.studyDate);
+    }
+
+    let foundStudy = studyList.filter(function (s) {
+        return s.studyInstanceUid === study.studyInstanceUid;
+    })[0];
+
+    if (!foundStudy) {
+        study.fileList = [];
+        study.totalFilesFromDICOMDIR = 0;
+        studyList.push(study);
+        return study;
+    }
+
+    if (study.modality && study.modality.length) {
+      foundStudy.modality = (foundStudy.modality || [])
+        .concat(study.modality).filter(function (v, i, a) { return i === a.indexOf(v); });
+    }
+
+    if (study.seriesIds && study.seriesIds.length) {
+      foundStudy.seriesIds = (foundStudy.seriesIds || [])
+        .concat(study.seriesIds).filter(function (v, i, a) { return i === a.indexOf(v); });
+    }
+
+    return foundStudy;
+  }
+
+  /**
+   * Adds the file to file list
+   * @param fileList List of file belongs to the same study
+   * @param file A dicom file
+   */
+  private addFileToFileList(fileList, file) {
+    let foundFile = fileList.filter(function (f) {
+        return f.sopInstanceUid === file.sopInstanceUid;
+    })[0];
+
+    if (!foundFile) {
+        fileList.push(file);
+    }
+  }
+
+  /**
+   * Merge the parsed file data into the final response
+   *
+   * @param response Response of the parsing process to receive the parsed data
+   * @param patient Patient data of the parsed dicom file
+   * @param study Study data of the parsed dicom file
+   * @param file Dicom File
+   *
+   * @returns The final patient list
+   */
+  private mergePatient(response, patient, study, file) {
+    let patientList = response && response.patientList || {};
+
+    patient = this.getPatientFromPatientList(patientList, patient);
+    study = this.getStudyFromStudyList(patient.studyList, study);
+    this.addFileToFileList(study.fileList, file);
+
+    return patientList;
+  }
 
   /**
    * Extracts DICOMDIR files
@@ -102,82 +346,102 @@ export class DicomParserService {
    * @returns An array of extracted DICOMDIR files
    */
   private extractDICOMDIRFiles(files) {
-  let dicomdirFiles = [];
+    let dicomdirFiles = [];
 
-  for (let i = 0; i < files.length; i++) {
-    let file = files[i];
-    if (file.file.name === DICOMDIR) {
-      dicomdirFiles.push(file);
-      files.splice(i--, 1);
+    for (let i = 0; i < files.length; i++) {
+      let file = files[i];
+      if (file.file.name === DICOMDIR) {
+        dicomdirFiles.push(file);
+        files.splice(i--, 1);
+      }
     }
+
+    return dicomdirFiles;
   }
 
-  return dicomdirFiles;
-}
-
+  /**
+   * Parses the DICOMDIR file to retrieve patient(s), study(s) and image(s) details
+   * @param dicomdirFile A dicomdir file
+   */
   private loadAndParseDICOMDIRFile(dicomdirFile) {
-  this.fileReaderPoolService.readFile(dicomdirFile).subscribe(response => {
-    console.log(response);
-    this.subject.next(response);
-    //TODO: Write code for DICOMDIR parsing
-  });
-  return this.subject.asObservable();
-}
-
-  private loadAndParseDICOMFile(file, finalResponse) {
-  this.fileReaderPoolService.readFile(file).subscribe(response => {
-    let patient: any = {};
-    let study: any = {};
-    let image: any = {};
-    let dataSet: any = {};
-    console.log(response);
-    try {
-      dataSet = dicomParser.parseDicom(response, { untilTag: 'x00200011' });
-      patient = this.getPatientDetails(dataSet);
-      study = this.getStudyDetails(dataSet);
-      image = this.getImageDetails(dataSet);
-
-      file.studyInstanceUid = study.studyInstanceUid;
-      file.seriesInstanceUid = study.seriesInstanceUid;
-      file.sopInstanceUid = image.sopInstanceUid;
-
-      //Read and validate transfer syntax uid
-      //var currTransferSyntaxUid = readTransferSyntax(dataSet, byteArray);
-      //study.transferSyntaxUid = _.has(validTransferSyntaxUid, currTransferSyntaxUid) ? currTransferSyntaxUid : null;
-    } catch (error) {
-
-    }
-
-
-
-
-    //this.subject.next(response);
-    //TODO: Write code for DICOMDIR parsing
-  });
-}
-
-getPatientList(files) : Observable < any > {
-
-  let dicomdirFiles = this.extractDICOMDIRFiles(files);
-  let self = this;
-  let finalResponse = {
-    totalCount: files.length,
-    notSupportedFiles: [],
-    patientList: {}
-  };
-
-  forkJoin(dicomdirFiles.map(function (dicomdirFile) {
-    return self.loadAndParseDICOMDIRFile(dicomdirFile);
-  })).subscribe(result => {
-    //this.subject.next(result);
-    forkJoin(files.map(function (file) {
-      return self.loadAndParseDICOMFile(files, finalResponse);
-    })).subscribe(result => {
-
+    this.fileReaderPoolService.readFile(dicomdirFile).subscribe(response => {
+      console.log(response);
+      this.subject.next(response);
+      //TODO: Write code for DICOMDIR parsing
     });
-  });
+    return this.subject.asObservable();
+  }
 
-  return this.subject.asObservable();
-}
+  /**
+   * Parses the dicom file to retrieve patient(s), study(s) and image(s) details
+   * @param file A dicom file
+   * @param finalResponse A final response containing patient(s) and study(s) details
+   */
+  private loadAndParseDICOMFile(file, finalResponse) {
+    console.log(file);
+    /* this.fileReaderPoolService.readFile(file).subscribe(fileByteArray => {
+      let patient: any = {};
+      let study: any = {};
+      let image: any = {};
+      let dataSet: any = {};
+      let fileObject = file[0].file;
+
+      try {
+        dataSet = dicomParser.parseDicom(fileByteArray, { untilTag: 'x00200011' });
+        patient = this.getPatientDetails(dataSet);
+        study = this.getStudyDetails(dataSet);
+        image = this.getImageDetails(dataSet);
+
+        fileObject.studyInstanceUid = study.studyInstanceUid;
+        fileObject.seriesInstanceUid = study.seriesInstanceUid;
+        fileObject.sopInstanceUid = image.sopInstanceUid;
+
+        //Read and validate transfer syntax uid
+        let currTransferSyntaxUid = this.readTransferSyntax(dataSet, fileByteArray);
+        study.transferSyntaxUid = _.has(this.validTransferSyntaxUid, currTransferSyntaxUid) ? currTransferSyntaxUid : null;
+
+        if (this.checkDicomMandatoryFields(patient, study)) {
+          this.mergePatient(finalResponse, patient, study, fileObject);
+        } else {
+          finalResponse.notSupportedFiles.push({ file: fileObject, reason: 'error-parsing-dicom-file' });
+        }
+      } catch (error) {
+        finalResponse.notSupportedFiles.push({ file: fileObject, reason: 'error-parsing-dicom-file' });
+      }
+      
+      this.subject.next(finalResponse);
+    }); */
+    return this.subject.asObservable();
+  }
+
+  /**
+   * Parses all the browsed files and returns list of patients and studies belongs to individual patient
+   * @param files All browsed files
+   * @param dicomAttributes All dicom attributes retrieved from a local JSON file
+   */
+  getPatientList(files, dicomAttributes) : Observable < any > {
+    let dicomdirFiles = this.extractDICOMDIRFiles(files);
+    let self = this;
+    let finalResponse = {
+      totalCount: files.length,
+      notSupportedFiles: [],
+      patientList: {}
+    };
+
+    this.setValidSopClassUid(dicomAttributes.sopClassUid);
+    this.setValidTransferSyntaxUid(dicomAttributes.transferSyntaxUid);
+
+    /* forkJoin(dicomdirFiles.map(function (dicomdirFile) {
+      return self.loadAndParseDICOMDIRFile(dicomdirFile);
+    })).subscribe(result => { */
+      forkJoin(files.map(function (file) {
+        return self.loadAndParseDICOMFile(file, finalResponse);
+      })).subscribe(finalResponse => {
+        this.subject.next(finalResponse);
+      });
+    //});
+
+    return this.subject.asObservable();
+  }
 
 }
