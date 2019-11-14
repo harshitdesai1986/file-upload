@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, Subject, forkJoin } from 'rxjs';
+import { finalize  } from 'rxjs/operators';
 import * as _ from "lodash";
 
 import { FileReaderPoolService } from './file-reader-pool.service';
@@ -378,39 +379,40 @@ export class DicomParserService {
    * @param finalResponse A final response containing patient(s) and study(s) details
    */
   private loadAndParseDICOMFile(file, finalResponse) {
-    console.log(file);
-    /* this.fileReaderPoolService.readFile(file).subscribe(fileByteArray => {
-      let patient: any = {};
-      let study: any = {};
-      let image: any = {};
-      let dataSet: any = {};
-      let fileObject = file[0].file;
+    this.fileReaderPoolService.readFile(file)
+      .subscribe(fileByteArray => {
+        let patient: any = {};
+        let study: any = {};
+        let image: any = {};
+        let dataSet: any = {};
+        let fileObject = file.file;
 
-      try {
-        dataSet = dicomParser.parseDicom(fileByteArray, { untilTag: 'x00200011' });
-        patient = this.getPatientDetails(dataSet);
-        study = this.getStudyDetails(dataSet);
-        image = this.getImageDetails(dataSet);
+        try {
+          dataSet = dicomParser.parseDicom(fileByteArray, { untilTag: 'x00200011' });
+          patient = this.getPatientDetails(dataSet);
+          study = this.getStudyDetails(dataSet);
+          image = this.getImageDetails(dataSet);
 
-        fileObject.studyInstanceUid = study.studyInstanceUid;
-        fileObject.seriesInstanceUid = study.seriesInstanceUid;
-        fileObject.sopInstanceUid = image.sopInstanceUid;
+          fileObject.studyInstanceUid = study.studyInstanceUid;
+          fileObject.seriesInstanceUid = study.seriesInstanceUid;
+          fileObject.sopInstanceUid = image.sopInstanceUid;
 
-        //Read and validate transfer syntax uid
-        let currTransferSyntaxUid = this.readTransferSyntax(dataSet, fileByteArray);
-        study.transferSyntaxUid = _.has(this.validTransferSyntaxUid, currTransferSyntaxUid) ? currTransferSyntaxUid : null;
+          //Read and validate transfer syntax uid
+          let currTransferSyntaxUid = this.readTransferSyntax(dataSet, fileByteArray);
+          study.transferSyntaxUid = _.has(this.validTransferSyntaxUid, currTransferSyntaxUid) ? currTransferSyntaxUid : null;
 
-        if (this.checkDicomMandatoryFields(patient, study)) {
-          this.mergePatient(finalResponse, patient, study, fileObject);
-        } else {
+          if (this.checkDicomMandatoryFields(patient, study)) {
+            this.mergePatient(finalResponse, patient, study, fileObject);
+          } else {
+            finalResponse.notSupportedFiles.push({ file: fileObject, reason: 'error-parsing-dicom-file' });
+          }
+        } catch (error) {
           finalResponse.notSupportedFiles.push({ file: fileObject, reason: 'error-parsing-dicom-file' });
         }
-      } catch (error) {
-        finalResponse.notSupportedFiles.push({ file: fileObject, reason: 'error-parsing-dicom-file' });
-      }
+        this.subject.next(finalResponse);
+        this.subject.complete();
+      });
       
-      this.subject.next(finalResponse);
-    }); */
     return this.subject.asObservable();
   }
 
@@ -419,7 +421,8 @@ export class DicomParserService {
    * @param files All browsed files
    * @param dicomAttributes All dicom attributes retrieved from a local JSON file
    */
-  getPatientList(files, dicomAttributes) : Observable < any > {
+  getPatientList(files, dicomAttributes) : Observable<any>{
+    //let subject = new Subject<any>();
     let dicomdirFiles = this.extractDICOMDIRFiles(files);
     let self = this;
     let finalResponse = {
@@ -431,17 +434,10 @@ export class DicomParserService {
     this.setValidSopClassUid(dicomAttributes.sopClassUid);
     this.setValidTransferSyntaxUid(dicomAttributes.transferSyntaxUid);
 
-    /* forkJoin(dicomdirFiles.map(function (dicomdirFile) {
-      return self.loadAndParseDICOMDIRFile(dicomdirFile);
-    })).subscribe(result => { */
-      forkJoin(files.map(function (file) {
+    return forkJoin(files.map(function (file) {
         return self.loadAndParseDICOMFile(file, finalResponse);
-      })).subscribe(finalResponse => {
-        this.subject.next(finalResponse);
-      });
-    //});
-
-    return this.subject.asObservable();
+      }));
+     
   }
 
 }

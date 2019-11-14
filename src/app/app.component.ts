@@ -49,7 +49,6 @@ export class AppComponent implements OnInit {
         });
       });
       
-      console.log(files);
       console.debug('filesAdded', event);
     });
 

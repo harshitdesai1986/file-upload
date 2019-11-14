@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
-import { Observable, Subject } from 'rxjs';
+import { Observable, Subject, Subscriber } from 'rxjs';
+import { finalize  } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
@@ -33,16 +34,18 @@ export class FileReaderPoolService {
     }
 
     fileReader.readAsArrayBuffer(file.file);
-    return subject.asObservable();
+    return subject;
   }
 
   private runNext() {
     if (this.runningCount < this.limit && this.queue.length > 0) {
         this.runningCount++;
-        this.getByteArrayOfFile(this.queue.shift())   .complete(function () {
+        this.getByteArrayOfFile(this.queue.shift())
+          .subscribe(() => {
+            console.log("Completed");
             this.runningCount > 0 && this.runningCount--;
             this.runNext();
-        });
+          });
     }
   }
 
@@ -57,12 +60,6 @@ export class FileReaderPoolService {
     this.runNext();
 
     return subject;
-  }
-
-  private cleanQueue = function () {
-      this.queue = [];
-      this.runningCount = 0;
-      console.log('cleaning the queue', this.runningCount, this.limit, this.queue.length);
   }
 
 }
