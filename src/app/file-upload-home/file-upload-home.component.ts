@@ -49,6 +49,9 @@ export class FileUploadHomeComponent implements OnInit {
           self.dicomParserService.getPatientList(fileObjects, dicomAttributes).subscribe(patientList => {
             console.log(patientList);
             //self.router.navigate(['/patient-list']);
+          },
+          err => {
+            self.toastr.error(err);
           });
         });
       }

@@ -1,8 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, Subject, forkJoin } from 'rxjs';
-import { finalize  } from 'rxjs/operators';
-import * as _ from "lodash";
+import * as _ from 'lodash';
 
 import { FileReaderPoolService } from './file-reader-pool.service';
 
@@ -439,7 +438,7 @@ export class DicomParserService {
       return self.loadAndParseDICOMFile(file, finalResponse);
     })).subscribe(() => {
       if(finalResponse.notSupportedFiles === finalResponse.totalCount) {
-        subject.next();
+        subject.error('All the file(s) are unsupported!');
       }
       subject.next(finalResponse);
     });

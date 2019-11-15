@@ -42,7 +42,6 @@ export class FileReaderPoolService {
         this.runningCount++;
         this.getByteArrayOfFile(this.queue.shift())
           .subscribe(() => {
-            console.log("Completed");
             this.runningCount > 0 && this.runningCount--;
             this.runNext();
           });
