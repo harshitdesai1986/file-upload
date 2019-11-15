@@ -23,7 +23,7 @@ export class FileReaderPoolService {
     var subject = item.subject;
     let fileReader: FileReader = new FileReader();
     let fileByteArray;
-    fileReader.onload = function(event) {
+    fileReader.onload = function() {
       let arrayBuffer: any = fileReader.result;
       fileByteArray = new Uint8Array(arrayBuffer);
       subject.next(fileByteArray);
@@ -33,7 +33,7 @@ export class FileReaderPoolService {
       subject.error('File reading error!');
     }
 
-    fileReader.readAsArrayBuffer(file.file);
+    fileReader.readAsArrayBuffer(file);
     return subject;
   }
 

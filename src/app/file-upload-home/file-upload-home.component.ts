@@ -39,20 +39,32 @@ export class FileUploadHomeComponent implements OnInit {
   ngOnInit() {
     let self = this;
     this.resumable.on('filesAdded', function(files){
-      let verifyUploadFileSize = self.dicomParserService.isUploadSizeGreaterThanTheLimit(files);
-      if(verifyUploadFileSize) {
+      let fileObjects = self.getFileObjects(files);
+      let verifyTotalUploadSize = self.dicomParserService.isUploadSizeGreaterThanTheLimit(fileObjects);
+      if(verifyTotalUploadSize) {
         self.toastr.error('Selected File(s) size is greater than the limit!');
       }
-
-      self.dicomParserService.getDicomAttributes().subscribe(dicomAttributes => {
-        self.dicomParserService.getPatientList(files, dicomAttributes).subscribe(patientList => {
-          console.log("Reached", patientList);
-          self.router.navigate(['/patient-list']);
+      else {
+        self.dicomParserService.getDicomAttributes().subscribe(dicomAttributes => {
+          self.dicomParserService.getPatientList(fileObjects, dicomAttributes).subscribe(patientList => {
+            console.log(patientList);
+            //self.router.navigate(['/patient-list']);
+          });
         });
-      });
-      
-      console.debug('filesAdded', event);
+      }
     });
+  }
 
+  /**
+   * Extracts file object from Resumable File object for each file
+   * @param files Resumable File Objects
+   * @returns List of file objects
+   */
+  getFileObjects(files) {
+    let fileList: Array<any> = [];
+    files.forEach(file => {
+      fileList.push(file.file);
+    });
+    return fileList;
   }
 }

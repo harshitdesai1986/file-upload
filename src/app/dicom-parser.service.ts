@@ -42,7 +42,7 @@ export class DicomParserService {
   isUploadSizeGreaterThanTheLimit(files) {
     let totalUploadSize: Number = 0;
     files.forEach(file => {
-      totalUploadSize += file.file.size;
+      totalUploadSize += file.size;
     });
 
     if (totalUploadSize > UPLOAD_LIMIT) {
@@ -351,7 +351,7 @@ export class DicomParserService {
 
     for (let i = 0; i < files.length; i++) {
       let file = files[i];
-      if (file.file.name === DICOMDIR) {
+      if (file.name === DICOMDIR) {
         dicomdirFiles.push(file);
         files.splice(i--, 1);
       }
@@ -385,7 +385,6 @@ export class DicomParserService {
         let study: any = {};
         let image: any = {};
         let dataSet: any = {};
-        let fileObject = file.file;
 
         try {
           dataSet = dicomParser.parseDicom(fileByteArray, { untilTag: 'x00200011' });
@@ -393,22 +392,23 @@ export class DicomParserService {
           study = this.getStudyDetails(dataSet);
           image = this.getImageDetails(dataSet);
 
-          fileObject.studyInstanceUid = study.studyInstanceUid;
-          fileObject.seriesInstanceUid = study.seriesInstanceUid;
-          fileObject.sopInstanceUid = image.sopInstanceUid;
+          file.studyInstanceUid = study.studyInstanceUid;
+          file.seriesInstanceUid = study.seriesInstanceUid;
+          file.sopInstanceUid = image.sopInstanceUid;
 
           //Read and validate transfer syntax uid
           let currTransferSyntaxUid = this.readTransferSyntax(dataSet, fileByteArray);
           study.transferSyntaxUid = _.has(this.validTransferSyntaxUid, currTransferSyntaxUid) ? currTransferSyntaxUid : null;
 
           if (this.checkDicomMandatoryFields(patient, study)) {
-            this.mergePatient(finalResponse, patient, study, fileObject);
+            this.mergePatient(finalResponse, patient, study, file);
           } else {
-            finalResponse.notSupportedFiles.push({ file: fileObject, reason: 'error-parsing-dicom-file' });
+            finalResponse.notSupportedFiles.push({ file: file, reason: 'error-parsing-dicom-file' });
           }
         } catch (error) {
-          finalResponse.notSupportedFiles.push({ file: fileObject, reason: 'error-parsing-dicom-file' });
+          finalResponse.notSupportedFiles.push({ file: file, reason: 'error-parsing-dicom-file' });
         }
+        finalResponse.parsedFileCount++;
         this.subject.next(finalResponse);
         this.subject.complete();
       });
@@ -422,11 +422,12 @@ export class DicomParserService {
    * @param dicomAttributes All dicom attributes retrieved from a local JSON file
    */
   getPatientList(files, dicomAttributes) : Observable<any>{
-    //let subject = new Subject<any>();
+    let subject = new Subject<any>();
     let dicomdirFiles = this.extractDICOMDIRFiles(files);
     let self = this;
     let finalResponse = {
       totalCount: files.length,
+      parsedFileCount: 0,
       notSupportedFiles: [],
       patientList: {}
     };
@@ -434,9 +435,16 @@ export class DicomParserService {
     this.setValidSopClassUid(dicomAttributes.sopClassUid);
     this.setValidTransferSyntaxUid(dicomAttributes.transferSyntaxUid);
 
-    return forkJoin(files.map(function (file) {
-        return self.loadAndParseDICOMFile(file, finalResponse);
-      }));
+    forkJoin(files.map(function (file) {
+      return self.loadAndParseDICOMFile(file, finalResponse);
+    })).subscribe(() => {
+      if(finalResponse.notSupportedFiles === finalResponse.totalCount) {
+        subject.next();
+      }
+      subject.next(finalResponse);
+    });
+
+    return subject.asObservable();
      
   }
 
