@@ -10,9 +10,16 @@ import { ToastrModule } from 'ngx-toastr';
 
 import { FormsModule } from '@angular/forms';
 
+import { FileUploadHomeComponent } from './file-upload-home/file-upload-home.component';
+import { PatientListComponent } from './patient-list/patient-list.component';
+import { StudyListComponent } from './study-list/study-list.component';
+
 @NgModule({
   declarations: [
-    AppComponent
+    AppComponent,
+    FileUploadHomeComponent,
+    PatientListComponent,
+    StudyListComponent
   ],
   imports: [
     BrowserModule,
