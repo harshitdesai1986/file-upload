@@ -9,26 +9,48 @@ export class FileUploadDataService {
 
   constructor() { }
 
+  /**
+   * Sets patient data
+   * @param patientData All data gathered from dicom file parsing
+   */
   setPatientData(patientData) {
     this.patientData = patientData;
   }
 
+  /**
+   * Gets patient data
+   * @returns Patient data
+   */
   getPatientData() {
     return this.patientData;
   }
 
+  /**
+   * Clears patient data
+   */
   clearPatientData() {
     this.patientData = null;
   }
 
+  /**
+   * Sets selected patient details
+   * @param patient Selected patient object
+   */
   setSelectedPatient(patient) {
     this.selectedPatientData = patient;
   }
 
+  /**
+   * Gets selected patient details
+   * @returns Selected patient details
+   */
   getSelectedPatient() {
     return this.selectedPatientData;
   }
 
+  /**
+   * Clears selected patiant details
+   */
   clearSelectedPatient() {
     this.selectedPatientData = null;
   }
@@ -58,6 +80,7 @@ export class FileUploadDataService {
   /**
    * Calculates patient's Age from patient's Date of Birth
    * @param patientDob Patient's DOB
+   * @returns patient age in comparison with current date
    */
   calculatePatientAge = function (patientDob) {
     let currentDate = new Date();
@@ -74,7 +97,7 @@ export class FileUploadDataService {
     }
 
     return DOB > utcCurrentDate ? --years : years;
-};
+  }
 
 
 }

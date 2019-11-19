@@ -1,1 +1,87 @@
-<p>study-list works!</p>
+<div class="toolbar">
+    <h5>LOGO</h5>
+</div>
+<div class="study-list-row">
+    <div class="study-list-container">
+        <div class="study-container-header">
+            <ol class="breadcrumb">
+                <li>
+                    <a class="breadcrumb-text breadcrumb-link" (click)="gotoPatientList();">
+                        Patients
+                    </a>
+                </li>
+                <li>
+                    <span class="breadcrumb-text"> > {{selectedPatient.name}}</span>
+                </li>
+            </ol>
+            <div class="selectStudyMsg">
+                Select study to attach
+            </div>
+        </div>
+        <hr>
+        <div class="patient-banner">
+            <div class="patient-name ellipsis" title="{{selectedPatient.name}}">{{selectedPatient.name}}</div>
+            <div class="patient-item">
+                <div class="patient-label">Patient ID</div>
+                <div class="patient-id ellipsis" title="{{selectedPatient.id}}">{{selectedPatient.id}}</div>
+            </div>
+            <div class="patient-item">
+                <div class="patient-label">Gender</div>
+                <div class="patient-gender" translate="">{{selectedPatient.gender}}</div>
+            </div>
+            <div class="patient-item">
+                <div class="patient-label">DOB</div>
+                <div class="patient-dob">{{selectedPatient.dob | date: 'dd MMM yyyy'}}</div>
+            </div>
+            <div class="patient-item patient-item-age">
+                <div class="patient-label">Age</div>
+                <div class="patient-age" >{{selectedPatient.age}}</div>
+            </div>
+        </div>
+        <div class="study-list-container-table">
+            <div class="study-list-tabulardata">
+                <div class="study-list-table-widget">
+                    <table class="study-list-table-widget-tbl">
+                        <thead class="study-list-table-widget-header">
+                            <tr>
+                                <td class="multiselect-cell">
+                                    <input id="table-widget-select-all" type="checkbox" (change)="toggleAll();">
+                                </td>
+                                <td>File Name</td>
+                                <td>Accession No</td>
+                                <td>Modality</td>
+                                <td>Study Date</td>
+                                <td>Size</td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="study-list-table-widget-row" *ngFor="let study of studyList">
+                                <td class="multiselect-cell">
+                                    <input id="table-widget-select-one" type="checkbox" (change)="toggleOne(study);">
+                                </td>
+                                <td class="study-name truncate-text">
+                                    <span>{{study.description || N/A}}</span>
+                                </td>
+                                <td>{{study.accessionNumber || NOT_APPLICABLE}}</td>
+                                <td>{{study.modality || NOT_APPLICABLE}}</td>
+                                <td>{{study.studyDate | date: 'dd MMM yyyy' || NOT_APPLICABLE}}</td>
+                                <td>{{study.size || NOT_APPLICABLE}}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="study-list-footer flex centered">
+            <span id="detailsDisplay" class="entries">Showing {{studyList.length}} entries</span>
+            <div class="flex-grow-proportionate">
+            </div>
+            <span>
+                <button id="attachStudies" class="btn btn-primary btn-sm attachStudiesBtn" type="button" ng-click="attachStudiesClick()">Attach {{studyList.length}} Files</button>
+            </span>
+            <span>
+                <button id="cancel" class="btn btn-outline-primary btn-sm cancelBtn" type="button" ng-click="cancelCallback()">Cancel</button>
+            </span>
+        </div>
+    </div>
+</div>

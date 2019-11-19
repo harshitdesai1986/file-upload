@@ -1,0 +1,230 @@
+.study-list-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.study-list-row {
+    .study-list-container {
+        border: 1px solid #d8d8d8;
+        border-radius: 5px;
+        background-color: #ffffff;
+        height: 600px;
+        width: 895px;
+        display: block;
+    }
+
+    .study-list-container {
+        hr {
+            border: 1px solid #dadada;
+            margin-bottom: 0;
+        }
+
+        .study-container-header {
+            margin-left: 15px;
+        }
+
+        .study-container-header {
+            .selectStudyMsg {
+                font-size: 16px;
+                color: #4a4a4a;
+                margin-bottom: 22px;
+            }
+
+            .breadcrumb {
+                margin-bottom: 0;
+                background-color: #ffffff;
+                padding-left: 0;
+                padding-bottom: 0;
+            }
+
+            .breadcrumb {
+                li {
+                    font-size: 27px;
+                }
+
+                .breadcrumb-text {
+                    color: #4a4a4a;
+                }
+
+                .breadcrumb-link {
+                    color: #0099dc;
+                    cursor: pointer;
+                    margin-right: 8px;
+                }
+            }
+        }
+
+        .patient-banner {
+            display: flex;
+            background: #D5F0F9;
+            height: 60px;
+            color: black;
+        }
+
+        .patient-banner {
+            .patient-name {
+                flex: 6 1 0%;
+                font-size: 24px;
+                align-self: center;
+                margin-left: 15px;
+                width: 0;
+                height: 30px;
+                line-height: 25px;
+            }
+
+            .ellipsis {
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            .patient-item {
+                flex: 2 1 0%;
+                align-self: center;
+                flex-direction: column;
+                padding-left: 15px;
+                min-width: 0;
+            }
+
+            .patient-label {
+                font-weight: bold;
+                font-size: 13px;
+            }
+        }
+
+        .study-list-container-table {
+            max-height: 380px;
+            overflow-y: auto;
+        }
+
+        .study-list-container-table {
+            .study-list-tabulardata {
+                display: block;
+                padding: 0 15px;
+            }
+
+            .study-list-tabulardata {
+                .study-list-table-widget {
+                    border-bottom: 1px solid #dadada;
+                    margin-bottom: 21px;
+                    text-align: left;
+                    color: #4a4a4a;
+                    font-size: 16px;
+                    background-color: #ffffff;
+                }
+
+                .study-list-table-widget {
+                    .study-list-table-widget-tbl {
+                        width: 100%;
+                        margin-top: 15px;
+                    }
+
+                    .study-list-table-widget-tbl {
+                        .study-list-table-widget-header {
+                            color: #4a4a4a;
+                            height: 60px;
+                            font-weight: bold;
+                            border-bottom: 4px solid #cdd3f0;
+                        }
+
+                        .study-list-table-widget-header {
+                            td {
+                                padding: 10px;
+                            }
+
+                            .multiselect-cell {
+                                width: 15px;
+                                padding-right: 0;
+                            }
+                        }
+
+                        .study-list-table-widget-row {
+                            height: 60px;
+                            border-top: 1px solid #CDD3F0;
+                        }
+
+                        .study-list-table-widget-row:nth-child(odd) {
+                            background-color: #f9f9f9;
+                        }
+
+                        .study-list-table-widget-row:hover {
+                            background-color: #d8d8d8;
+                        }
+
+                        .study-list-table-widget-row {
+                            td {
+                                padding: 10px;
+                                vertical-align: middle;
+                            }
+
+                            td.study-name {
+                                max-width: 230px;
+                                width: 230px;
+                            }
+
+                            td.patient-id {
+                                max-width: 95px;
+                                width: 95px;
+                            }
+
+                            td.truncate-text {
+                                overflow: hidden;
+                                text-overflow: ellipsis;
+                                white-space: nowrap;
+                            }
+
+                        }
+                    }
+                }
+            }
+
+            
+        }
+
+        .study-list-footer {
+            border-top: 1px solid #d8d8d8;
+            height: 60px;
+            position: absolute;
+            bottom: 0;
+            width: 894px;
+            align-items: center;
+            display: flex;
+        }
+
+        .study-list-footer {
+            span.entries {
+                display: inline-block;
+                font-size: 16px;
+                color: #9b9b9b;
+                margin-left: 15px;
+                position: relative;
+                top: -5px;
+            }
+
+            button.cancelBtn {
+                width: 115px;
+                margin: 15px 15px 15px 0;
+                position: relative;
+                top: -5px;
+            }
+
+            button.attachStudiesBtn {
+                width: 153px;
+                display: inline-block;
+                background: #0098d6;
+                border-radius: 2px;
+                font-size: 16px;
+                color: #ffffff;
+                text-align: center;
+                margin: 15px 12px 15px 0;
+                position: relative;
+                top: -5px;
+            }
+
+            div.flex-grow-proportionate {
+                flex-grow: 1;
+            }
+        }
+    }
+}

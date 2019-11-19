@@ -33,7 +33,7 @@
                         <tbody>
                             <tr class="patient-list-table-widget-row" *ngFor="let patient of patientList">
                                 <td class="patient-name truncate-text">
-                                    <span (click)="selectPatient(patient);">{{patient.name || N/A}}</span>
+                                    <span (click)="selectPatient(patient);">{{patient.name || NOT_APPLICABLE}}</span>
                                 </td>
                                 <td calss="patient-id truncate-text">{{patient.id || NOT_APPLICABLE}}</td>
                                 <td>{{patient.gender || NOT_APPLICABLE}}</td>

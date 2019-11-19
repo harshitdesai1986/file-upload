@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import {Router} from "@angular/router";
-
 import { DatePipe } from '@angular/common';
 
 import * as _ from 'lodash';
@@ -115,8 +114,13 @@ export class PatientListComponent implements OnInit {
     }
   }
 
+  /**
+   * Selects patient details, sets patient details to service method and redirects user to study list screen
+   * @param patient Selected patient details
+   */
   private selectPatient(patient) {
     this.fileUploadDataService.setSelectedPatient(patient);
+    this.router.navigate(['/study-list']);
   }
 
 }
