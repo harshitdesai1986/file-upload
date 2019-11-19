@@ -6,6 +6,8 @@ import * as Resumable from '../../../3rdparty/resumablejs/resumable.js';
 
 import { DicomParserService } from '../dicom-parser.service';
 
+import { FileUploadDataService } from '../file-upload-data.service';
+
 // Upload URL
 const URL = 'http://localhost:3000/upload';
 
@@ -30,7 +32,7 @@ export class FileUploadHomeComponent implements OnInit {
 
   addedFiles = [];
 
-  constructor(private router:Router, private toastr: ToastrService, private dicomParserService: DicomParserService) { }
+  constructor(private router:Router, private toastr: ToastrService, private dicomParserService: DicomParserService, private fileUploadDataService: FileUploadDataService) { }
 
   ngAfterViewInit() {
     this.resumable.assignBrowse(this.browseButton.nativeElement, true);
@@ -47,8 +49,8 @@ export class FileUploadHomeComponent implements OnInit {
       else {
         self.dicomParserService.getDicomAttributes().subscribe(dicomAttributes => {
           self.dicomParserService.getPatientList(fileObjects, dicomAttributes).subscribe(patientList => {
-            console.log(patientList);
-            //self.router.navigate(['/patient-list']);
+            self.fileUploadDataService.setPatientData(patientList);
+            self.router.navigate(['/patient-list']);
           },
           err => {
             self.toastr.error(err);

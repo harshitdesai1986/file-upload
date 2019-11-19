@@ -4,6 +4,7 @@ import { Observable, Subject, forkJoin } from 'rxjs';
 import * as _ from 'lodash';
 
 import { FileReaderPoolService } from './file-reader-pool.service';
+import { FileUploadDataService } from './file-upload-data.service';
 
 import * as dicomParser from '../../3rdparty/dicom-parser/dist/dicomParser.js';
 import * as dicomCharSet from '../../3rdparty/dicom-character-set/dicom-character-set.js';
@@ -23,7 +24,7 @@ export class DicomParserService {
   private validTransferSyntaxUid: any;
   private validSopClassUid: any;
 
-  constructor(private fileReaderPoolService: FileReaderPoolService, private http: HttpClient) { }
+  constructor(private fileReaderPoolService: FileReaderPoolService, private http: HttpClient, private fileUploadDataService: FileUploadDataService) { }
 
   /**
    * Makes a GET call to read dicom attributes JSON file and returns response
@@ -205,28 +206,6 @@ export class DicomParserService {
   }
 
   /**
-   * Converts date into UTC date and returns it in milliseconds
-   * @param date date string in "yyyy.MM.dd" or "yyyymmdd" format
-   * @returns {Number|number}
-   */
-  private convertDateToUTC(date) {
-    if (date instanceof Date) {
-        date = date.toJSON().slice(0, 10).replace(/-/g, '');
-    }
-    let formattedDate = date && (String(date).indexOf('.') > -1) ? date.replace(/\./g, '') : date;
-    //formattedDate yyyymmdd;
-    if (formattedDate.length === 8) {
-        let year = formattedDate.slice(0, 4),
-            // UTC allows months from 0-11, thus month - 1
-            month = Number(formattedDate.slice(4, 6)) - 1,
-            day = formattedDate.slice(6, 8);
-        return Date.UTC(year, month, day);
-    } else {
-        return formattedDate;
-    }
-  }
-
-  /**
    * Adds the patient details to patient list
    * @param patientList List of patients containing patients retrieved from Dicom files
    * @param patient Patient retrieved from current Dicom file
@@ -237,7 +216,7 @@ export class DicomParserService {
     let mergeId = this.getUniquePatientDetails(patient);
 
     if (patient.dob) {
-        patient.dob = this.convertDateToUTC(patient.dob);
+        patient.dob = this.fileUploadDataService.convertDateToUTC(patient.dob);
     }
 
     //patient.fhirName = getFhirName(patient.fhirName);
@@ -278,7 +257,7 @@ export class DicomParserService {
     study = this.copyStudy(study);
 
     if (study.studyDate) {
-        study.studyDate = this.convertDateToUTC(study.studyDate);
+        study.studyDate = this.fileUploadDataService.convertDateToUTC(study.studyDate);
     }
 
     let foundStudy = studyList.filter(function (s) {
@@ -408,8 +387,11 @@ export class DicomParserService {
           finalResponse.notSupportedFiles.push({ file: file, reason: 'error-parsing-dicom-file' });
         }
         finalResponse.parsedFileCount++;
-        this.subject.next(finalResponse);
-        this.subject.complete();
+        if(finalResponse.parsedFileCount === finalResponse.totalCount) {
+          this.subject.next(finalResponse);
+          this.subject.complete();
+        }
+        
       });
       
     return this.subject.asObservable();
@@ -437,7 +419,7 @@ export class DicomParserService {
     forkJoin(files.map(function (file) {
       return self.loadAndParseDICOMFile(file, finalResponse);
     })).subscribe(() => {
-      if(finalResponse.notSupportedFiles === finalResponse.totalCount) {
+      if(finalResponse.notSupportedFiles.length === finalResponse.totalCount) {
         subject.error('All the file(s) are unsupported!');
       }
       subject.next(finalResponse);

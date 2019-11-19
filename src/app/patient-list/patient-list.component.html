@@ -1,7 +1,62 @@
-<div class="row">
+<div class="toolbar">
+    <h5>LOGO</h5>
+</div>
+<div class="patient-list-row">
     <div class="patient-list-container">
-
+        <div class="patient-container-header">
+            <ol class="breadcrumb">
+                <li>
+                    <span class="breadcrumb-text">
+                        Patients
+                    </span>
+                </li>
+            </ol>
+            <div class="selectedPatientMsg">
+                Select a patient to view their studies
+            </div>
+        </div>
+        <hr>
+        <div class="patient-list-container-table">
+            <div class="patient-list-tabulardata">
+                <div class="patient-list-table-widget">
+                    <table class="patient-list-table-widget-tbl">
+                        <thead class="patient-list-table-widget-header">
+                            <tr>
+                                <td>Name</td>
+                                <td>Patient ID</td>
+                                <td>Gender</td>
+                                <td>Age</td>
+                                <td>DOB</td>
+                                <td>Size</td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="patient-list-table-widget-row" *ngFor="let patient of patientList">
+                                <td class="patient-name truncate-text">
+                                    <span (click)="selectPatient(patient);">{{patient.name || N/A}}</span>
+                                </td>
+                                <td calss="patient-id truncate-text">{{patient.id || NOT_APPLICABLE}}</td>
+                                <td>{{patient.gender || NOT_APPLICABLE}}</td>
+                                <td>{{patient.age || NOT_APPLICABLE}}</td>
+                                <td>{{patient.dob | date: 'dd MMM yyyy' || NOT_APPLICABLE}}</td>
+                                <td>{{patient.studyList.length || NOT_APPLICABLE}} Studies</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="patient-list-footer flex centered">
+            <span id="detailsDisplay" class="entries">Showing {{patientList.length}} entries</span>
+            <div class="flex-grow-proportionate">
+            </div>
+    
+            <span>
+                <button id="cancel" class="btn btn-outline-primary btn-sm cancelBtn" type="button" ng-click="cancelCallback()">Cancel</button>
+            </span>
+        </div>
     </div>
+    
 
 </div>
 
