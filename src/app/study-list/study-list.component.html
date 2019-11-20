@@ -45,7 +45,7 @@
                         <thead class="study-list-table-widget-header">
                             <tr>
                                 <td class="multiselect-cell">
-                                    <input id="table-widget-select-all" type="checkbox" (change)="toggleAll();">
+                                    <input id="table-widget-select-all" type="checkbox" [checked]="selectedPatient.selectAll" (change)="toggleAll();">
                                 </td>
                                 <td>File Name</td>
                                 <td>Accession No</td>
@@ -57,11 +57,9 @@
                         <tbody>
                             <tr class="study-list-table-widget-row" *ngFor="let study of studyList">
                                 <td class="multiselect-cell">
-                                    <input id="table-widget-select-one" type="checkbox" (change)="toggleOne(study);">
+                                    <input id="table-widget-select-one" type="checkbox" [checked]="study.isSelected" (change)="toggleOne(study);">
                                 </td>
-                                <td class="study-name truncate-text">
-                                    <span>{{study.description || N/A}}</span>
-                                </td>
+                                <td class="study-name truncate-text" title="{{study.description || N/A}}">{{study.description || N/A}}</td>
                                 <td>{{study.accessionNumber || NOT_APPLICABLE}}</td>
                                 <td>{{study.modality || NOT_APPLICABLE}}</td>
                                 <td>{{study.studyDate | date: 'dd MMM yyyy' || NOT_APPLICABLE}}</td>
@@ -77,7 +75,7 @@
             <div class="flex-grow-proportionate">
             </div>
             <span>
-                <button id="attachStudies" class="btn btn-primary btn-sm attachStudiesBtn" type="button" ng-click="attachStudiesClick()">Attach {{studyList.length}} Files</button>
+                <button id="attachStudies" class="btn btn-primary btn-sm attachStudiesBtn" type="button" [disabled]="noOfStudiesSelected === 0" ng-click="attachStudiesClick()">Upload {{noOfStudiesSelected}} Files</button>
             </span>
             <span>
                 <button id="cancel" class="btn btn-outline-primary btn-sm cancelBtn" type="button" ng-click="cancelCallback()">Cancel</button>

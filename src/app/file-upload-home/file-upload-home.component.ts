@@ -72,4 +72,8 @@ export class FileUploadHomeComponent implements OnInit {
     });
     return fileList;
   }
+
+  startUpload() {
+    this.resumable.upload();
+  }
 }

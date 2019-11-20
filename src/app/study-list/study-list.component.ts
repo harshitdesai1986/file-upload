@@ -15,6 +15,7 @@ export class StudyListComponent implements OnInit {
   private selectedPatient = null;
   private studyList: any[] = [];
   private NOT_APPLICABLE = 'N/A';
+  private noOfStudiesSelected: number = 0;
 
   constructor(private router:Router, private datePipe: DatePipe, private fileUploadDataService: FileUploadDataService) { }
 
@@ -33,7 +34,31 @@ export class StudyListComponent implements OnInit {
   }
 
   private gotoPatientList() {
+    this.studyList.forEach(function(study) {
+      study.isSelected = false;
+    });
+    this.selectedPatient.selectAll = false;
     this.router.navigate(['/patient-list']);
+  }
+
+  private toggleOne(study) {
+    study.isSelected = !study.isSelected;
+    if(study.isSelected) {
+      this.noOfStudiesSelected++;
+    } else {
+      this.noOfStudiesSelected--;
+    }
+    this.selectedPatient.selectAll = this.noOfStudiesSelected === this.selectedPatient.studyList.length ? true : false;
+    console.log(study.id, study.isSelected, this.noOfStudiesSelected);
+  }
+
+  private toggleAll() {
+    let self = this;
+    this.selectedPatient.selectAll = !this.selectedPatient.selectAll;
+    this.noOfStudiesSelected = this.selectedPatient.selectAll ? this.selectedPatient.studyList.length : 0;
+    this.studyList.forEach(function(study) {
+      study.isSelected = self.selectedPatient.selectAll ? true : false;
+    });
   }
 
 }
