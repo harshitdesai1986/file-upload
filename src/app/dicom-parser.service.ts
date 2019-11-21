@@ -356,7 +356,7 @@ export class DicomParserService {
    * @param file A dicom file
    * @param finalResponse A final response containing patient(s) and study(s) details
    */
-  private loadAndParseDICOMFile(file, finalResponse) {
+  private loadAndParseDICOMFile(file, finalResponse, subject) {
     this.fileReaderPoolService.readFile(file)
       .subscribe(fileByteArray => {
         let patient: any = {};
@@ -388,13 +388,13 @@ export class DicomParserService {
         }
         finalResponse.parsedFileCount++;
         if(finalResponse.parsedFileCount === finalResponse.totalCount) {
-          this.subject.next(finalResponse);
-          this.subject.complete();
+          subject.next(finalResponse);
+          subject.complete();
         }
         
       });
       
-    return this.subject.asObservable();
+    return subject.asObservable();
   }
 
   /**
@@ -417,7 +417,7 @@ export class DicomParserService {
     this.setValidTransferSyntaxUid(dicomAttributes.transferSyntaxUid);
 
     forkJoin(files.map(function (file) {
-      return self.loadAndParseDICOMFile(file, finalResponse);
+      return self.loadAndParseDICOMFile(file, finalResponse, subject);
     })).subscribe(() => {
       if(finalResponse.notSupportedFiles.length === finalResponse.totalCount) {
         subject.error('All the file(s) are unsupported!');

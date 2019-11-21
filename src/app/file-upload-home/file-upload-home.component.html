@@ -12,26 +12,27 @@
 <div class="row">
   <div class="side">
     <p>(<span>*</span>) Required</p>
-    <h6>Add Attachments ({{totalFiles}} attachments)</h6>
+    <h6>Add Attachments ({{addedFiles.length}} attachments)</h6>
     <!-- <input type="file" name="filePicker" webkitdirectory multiple #file /> -->
     <button type="button" class="btn btn-secondary btn-lg" id="browseButton" #browseButton>
       <i class="fas fa-compact-disc"></i>
       <span>Add Imaging from CD/DVD/Local DICOM</span>
     </button>
     <p class="label">Message <span>*</span></p>
-    <textarea rows="4" cols="62" maxlength="500" placeholder="Enter a message (Max. 500 characters)" required></textarea>
+    <textarea rows="4" cols="62" maxlength="500" placeholder="Enter a message (Max. 500 characters)" [(ngModel)]="uploadMessage" required></textarea>
     <br>
     <br>
     <div>
-      <button type="button" class="btn btn-secondary">Cancel</button>
-      <button type="button" class="btn btn-primary" (click)="startUpload()">Upload</button>
+      <!-- <button type="button" class="btn btn-secondary">Cancel</button> -->
+      <button type="button" class="btn btn-primary" [disabled]="addedFiles.length === 0" (click)="startParsing()">Parse</button>
     </div>
     <br>
     <br>
-    <h6>Uploading Files ({{totalFiles}} Attachments)</h6>
+    <h4 *ngIf="readingInProgress">File(s) parsing in progress, please wait...</h4>
+    <!-- <h6>Uploading Files ({{addedFiles.length}} Attachments)</h6>
     <div class="progress">
       <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100" ></div>
-    </div>
+    </div> -->
   </div>
 
 

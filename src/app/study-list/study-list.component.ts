@@ -61,4 +61,12 @@ export class StudyListComponent implements OnInit {
     });
   }
 
+  private attachStudiesClick() {
+    console.log("Selected Patient", this.selectedPatient);
+  }
+
+  private cancelUpload() {
+    this.router.navigate(['/home']);
+  }
+
 }

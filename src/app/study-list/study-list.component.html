@@ -75,10 +75,10 @@
             <div class="flex-grow-proportionate">
             </div>
             <span>
-                <button id="attachStudies" class="btn btn-primary btn-sm attachStudiesBtn" type="button" [disabled]="noOfStudiesSelected === 0" ng-click="attachStudiesClick()">Upload {{noOfStudiesSelected}} Files</button>
+                <button id="attachStudies" class="btn btn-primary btn-sm attachStudiesBtn" type="button" [disabled]="noOfStudiesSelected === 0" (click)="attachStudiesClick()">Attach {{noOfStudiesSelected}} Files</button>
             </span>
             <span>
-                <button id="cancel" class="btn btn-outline-primary btn-sm cancelBtn" type="button" ng-click="cancelCallback()">Cancel</button>
+                <button id="cancel" class="btn btn-outline-primary btn-sm cancelBtn" type="button" (click)="cancelUpload()">Cancel</button>
             </span>
         </div>
     </div>

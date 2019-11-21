@@ -38,7 +38,12 @@ export class PatientListComponent implements OnInit {
   private calculatePatientAge(patient) {
     if (patient.dob) {
         let birthDate = this.fileUploadDataService.convertDateToUTC(patient.dob);
-        patient.age = this.fileUploadDataService.calculatePatientAge(this.datePipe.transform(birthDate, 'yyyy-MM-dd', 'UTC'));
+        try {
+          patient.age = this.fileUploadDataService.calculatePatientAge(this.datePipe.transform(birthDate, 'yyyy-MM-dd', 'UTC'));
+        } catch {
+          patient.age = 'N/A';
+        }
+        
     }
   }
 
@@ -121,6 +126,10 @@ export class PatientListComponent implements OnInit {
   private selectPatient(patient) {
     this.fileUploadDataService.setSelectedPatient(patient);
     this.router.navigate(['/study-list']);
+  }
+
+  private cancelUpload() {
+    this.router.navigate(['/home']);
   }
 
 }

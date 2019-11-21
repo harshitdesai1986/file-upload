@@ -20,17 +20,10 @@ export class FileUploadHomeComponent implements OnInit {
 
   @ViewChild('browseButton', { static: false }) browseButton: ElementRef;
 
-  public resumable: Resumable = new Resumable({
-    target: URL,
-    chunkSize:10*1024*1024,
-    simultaneousUploads:4,
-    testChunks:false,
-    throttleProgressCallbacks:1
-  });
-
-  totalFiles: Number = 0;
-
-  addedFiles = [];
+  private addedFiles: any[] = [];
+  private uploadMessage: string = "";
+  private resumable: Resumable;
+  private readingInProgress = false;
 
   constructor(private router:Router, private toastr: ToastrService, private dicomParserService: DicomParserService, private fileUploadDataService: FileUploadDataService) { }
 
@@ -39,24 +32,18 @@ export class FileUploadHomeComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.resumable = new Resumable({
+      target: URL,
+      chunkSize:10*1024*1024,
+      simultaneousUploads:4,
+      testChunks:false,
+      throttleProgressCallbacks:1
+    });
     let self = this;
+    console.log("ALready attached files ", this.resumable.files);
+    console.log("Patient Data >> ", self.fileUploadDataService.getPatientData());
     this.resumable.on('filesAdded', function(files){
-      let fileObjects = self.getFileObjects(files);
-      let verifyTotalUploadSize = self.dicomParserService.isUploadSizeGreaterThanTheLimit(fileObjects);
-      if(verifyTotalUploadSize) {
-        self.toastr.error('Selected File(s) size is greater than the limit!');
-      }
-      else {
-        self.dicomParserService.getDicomAttributes().subscribe(dicomAttributes => {
-          self.dicomParserService.getPatientList(fileObjects, dicomAttributes).subscribe(patientList => {
-            self.fileUploadDataService.setPatientData(patientList);
-            self.router.navigate(['/patient-list']);
-          },
-          err => {
-            self.toastr.error(err);
-          });
-        });
-      }
+      self.addedFiles = files;
     });
   }
 
@@ -73,7 +60,34 @@ export class FileUploadHomeComponent implements OnInit {
     return fileList;
   }
 
-  startUpload() {
+  /* startUpload() {
     this.resumable.upload();
+  } */
+
+  private startParsing() {
+    console.log("attached files ", this.resumable.files);
+    if(this.uploadMessage != "") {
+      let fileObjects = this.getFileObjects(this.addedFiles);
+      let verifyTotalUploadSize = this.dicomParserService.isUploadSizeGreaterThanTheLimit(fileObjects);
+      if(verifyTotalUploadSize) {
+        this.toastr.error('Selected File(s) size is greater than the limit!');
+      }
+      else {
+        this.readingInProgress = true;
+        this.dicomParserService.getDicomAttributes().subscribe(dicomAttributes => {
+          this.dicomParserService.getPatientList(fileObjects, dicomAttributes).subscribe(patientList => {
+            this.readingInProgress = false;
+            this.fileUploadDataService.setPatientData(patientList);
+            this.router.navigate(['/patient-list']);
+          },
+          err => {
+            this.readingInProgress = false;
+            this.toastr.error(err);
+          });
+        });
+      }
+    } else {
+      this.toastr.error('Enter a message to continue!');
+    }
   }
 }
