@@ -26,6 +26,8 @@ export class FileUploadHomeComponent implements OnInit {
   private readingInProgress = false;
   private uploadProgress: number = 0;
   private transactionId;
+  private uploadTransactions;
+  private existingResumableObject = null;
 
   constructor(private router:Router, private toastr: ToastrService, private dicomParserService: DicomParserService, private fileUploadDataService: FileUploadDataService) { }
 
@@ -44,13 +46,14 @@ export class FileUploadHomeComponent implements OnInit {
 
     let self = this;
 
-    this.dicomParserService.getUUID().subscribe(data => {
+    this.fileUploadDataService.getUUID().subscribe(data => {
       self.transactionId = data;
     });
     
     console.log("Already attached files ", this.resumable.files);
     console.log("Patient Data >> ", this.fileUploadDataService.getPatientData());
     let patientData = this.fileUploadDataService.getPatientData();
+    this.populateTransactionTable(patientData.resumable);
     if(patientData && patientData.resumable){
       patientData.resumable.on('progress', function() {
         self.uploadProgress = Math.round(patientData.resumable.progress(true) * 100);
@@ -60,9 +63,18 @@ export class FileUploadHomeComponent implements OnInit {
     // On Files browsed using ResumableJS
     this.resumable.on('filesAdded', function(files){
       self.addedFiles = files;
-      self.resumable.files.forEach(resumableFile => {
-        resumableFile.transactionUid = self.transactionId.uid;
-      });
+    });
+  }
+
+  /**
+   * Populates transaction table 
+   * @param resumableObject resumable object to display upload progress or upload status
+   */
+  populateTransactionTable(resumableObject) {
+    this.fileUploadDataService.getAllTransactions().subscribe(response => {
+      console.log("response  ", response);
+      this.uploadTransactions = response;
+      this.existingResumableObject = resumableObject;
     });
   }
 
@@ -79,8 +91,10 @@ export class FileUploadHomeComponent implements OnInit {
     return fileList;
   }
 
+  /**
+   * Starts parsing browsed files to retrieve Patient(s), Study(s) and Image(s)
+   */
   private startParsing() {
-    console.log("attached files ", this.resumable.files);
     if(this.uploadMessage != "") {
       let fileObjects = this.getFileObjects(this.addedFiles);
       let verifyTotalUploadSize = this.dicomParserService.isUploadSizeGreaterThanTheLimit(fileObjects);
@@ -93,6 +107,10 @@ export class FileUploadHomeComponent implements OnInit {
           this.dicomParserService.getPatientList(fileObjects, dicomAttributes).subscribe(patientList => {
             this.readingInProgress = false;
             this.fileUploadDataService.setPatientData(patientList, this.resumable);
+            this.resumable.files.forEach(resumableFile => {
+              resumableFile.file.transactionUid = this.transactionId.uid;
+              resumableFile.file.uploadMessage = this.uploadMessage;
+            });
             this.router.navigate(['/patient-list']);
           },
           err => {

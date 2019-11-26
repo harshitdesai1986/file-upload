@@ -1,4 +1,10 @@
 import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+
+const backendURL = 'http://localhost:3000';
+const getUuidURL = backendURL + '/uuid';
+const insertTransactionURL = backendURL + '/insertTransaction';
+const getTransactionsURL = backendURL + '/getTransactions';
 
 @Injectable({
   providedIn: 'root'
@@ -13,7 +19,29 @@ export class FileUploadDataService {
     resumable: null
   };
 
-  constructor() { }
+  constructor(private http: HttpClient) { }
+
+  /**
+   * Returns unique UUID from backend
+   */
+  getUUID() {
+    return this.http.get(getUuidURL);
+  }
+
+  /**
+   * Inserts record in DB before initiating upload
+   * @param data transaction data to be inserted in DB
+   */
+  insertUploadTransaction(data) {
+    return this.http.post(insertTransactionURL, data);
+  }
+
+  /**
+   * Gets all the upload transactions from DB
+   */
+  getAllTransactions() {
+    return this.http.get(getTransactionsURL);
+  }
 
   /**
    * Sets patient data

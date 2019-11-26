@@ -6,11 +6,16 @@ var multipart = require('connect-multiparty');
 var crypto = require('crypto');
 var cors = require('cors');
 const uuidv1 = require('uuid/v1');
+const pool = require('./postgres').pool;
+var bodyParser = require('body-parser');
 
 // Host most stuff in the public folder
 app.use(express.static(__dirname + '/public'));
 
 app.use(multipart());
+
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
 const corsOptions = {
   origin: 'http://localhost:4200',
@@ -76,6 +81,26 @@ app.get('/resumable.js', function (req, res) {
   var fs = require('fs');
   res.setHeader("content-type", "application/javascript");
   fs.createReadStream("../3rdparty/resumablejs/resumable.js").pipe(res);
+});
+
+app.post('/insertTransaction', function(req, res){
+  const { uid, message, startdate } = req.body;
+  
+  pool.query('INSERT INTO transactions (username, uid, message, startdate, status) VALUES ($1, $2, $3, $4, $5)', ["DEFAULT", uid, message, startdate, "Pending"], (error, results) => {
+    if (error) {
+      throw error;
+    }
+    res.status(201).send(results);
+  })
+});
+
+app.get('/getTransactions', function(req, res){
+  pool.query('SELECT * FROM transactions ORDER BY startdate DESC', (error, results) => {
+    if (error) {
+      throw error;
+    }
+    res.status(200).json(results.rows);
+  });
 });
 
 app.listen(3000);

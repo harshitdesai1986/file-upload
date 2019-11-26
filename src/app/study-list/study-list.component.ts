@@ -76,7 +76,11 @@ export class StudyListComponent implements OnInit {
     });
   }
 
-  getFilesToBeUploaded(study) {
+  /**
+   * Extracts files from study for uploading
+   * @param study A study containing dicom files
+   */
+  private getFilesToBeUploaded(study) {
     if(study.isSelected) {
       study.fileList.forEach(file => {
         this.filesToBoUploaded.push(file);
@@ -88,24 +92,43 @@ export class StudyListComponent implements OnInit {
    * Uploads selected study files
    */
   private uploadSelectedStudies() {
-    let self = this;
-    console.log("Selected Patient", this.selectedPatient.patientData);
+    let resumableFilesToBeUploaded: any[] = [];
+    let transactionData = {
+      uid: null,
+      startdate: null,
+      message: null
+    };
     this.studyList.forEach(study => {
       this.getFilesToBeUploaded(study);
     });
-    console.log("All Resumable Files  ", this.selectedPatient.resumable.files);
-    console.log("Files to be uploaded  ", this.filesToBoUploaded);
-    this.selectedPatient.resumable.files.forEach(file => {
-      let currentFile = file;
-      this.filesToBoUploaded.forEach(file => {
-        if(file.uniqueIdentifier !== currentFile.file.uniqueIdentifier) {
-          this.selectedPatient.resumable.removeFile(currentFile);
+    
+    this.filesToBoUploaded.forEach(file => {
+      let fileToBeUploaded = file;
+      this.selectedPatient.resumable.files.forEach(resumableFile => {
+        if(fileToBeUploaded.uniqueIdentifier === resumableFile.file.uniqueIdentifier) {
+          resumableFilesToBeUploaded.push(resumableFile);
         }
       });
     });
+
+    // Assigns only files to be uploaded to resumable onject
+    this.selectedPatient.resumable.files = resumableFilesToBeUploaded;
+
     console.log("Final set of files to be uploaded  ", this.selectedPatient.resumable.files);
-    //this.selectedPatient.resumable.upload();
-    //this.router.navigate(['/home']);
+
+    transactionData.uid = this.selectedPatient.resumable.files[0].file.transactionUid;
+    transactionData.message = this.selectedPatient.resumable.files[0].file.uploadMessage;
+    transactionData.startdate = new Date().getTime();
+
+    console.log("transactionData   ", transactionData);
+
+    this.fileUploadDataService.insertUploadTransaction(transactionData).subscribe(response => {
+      if(response) {
+        this.selectedPatient.resumable.upload();
+        this.router.navigate(['/home']);
+      }
+    });
+    
   }
 
   /**

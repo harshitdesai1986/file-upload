@@ -13,7 +13,7 @@
   <div class="side">
     <p>(<span>*</span>) Required</p>
     <h6>Add Attachments ({{addedFiles.length}} attachments)</h6>
-    <!-- <input type="file" name="filePicker" webkitdirectory multiple #file /> -->
+    
     <button type="button" class="btn btn-secondary btn-lg" id="browseButton" #browseButton>
       <i class="fas fa-compact-disc"></i>
       <span>Add Imaging from CD/DVD/Local DICOM</span>
@@ -43,34 +43,21 @@
         </tr>
       </thead>
       <tbody>
-          <tr>
-            <td>Default</td>
-            <td>This is my first upload.</td>
-            <td>10/22/2019</td>
-            <td>10/22/2019</td>
-            <td>
-              <div class="progress upload-progress">
-                <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100" [ngStyle]="{'width': uploadProgress + '%'}">{{uploadProgress}}%</div>
-              </div>
-            </td>
-          </tr>
-        <tr>
-          <td>Default</td>
-          <td>This is my first upload.</td>
-          <td>10/22/2019</td>
-          <td>10/22/2019</td>
-          <td class="table-success">Success</td>
-        </tr>
-        <tr>
-          <td>Default</td>
-          <td>This is my first upload.</td>
-          <td>10/22/2019</td>
-          <td>10/22/2019</td>
-          <td class="table-danger" title="Failed Due to unknown reasons.">Failed</td>
+        <tr *ngFor="let transaction of uploadTransactions">
+          <td>{{transaction.username}}</td>
+          <td>{{transaction.message}}</td>
+          <td>{{transaction.startdate | date: 'dd MMM yyyy' }}</td>
+          <td>{{transaction.enddate | date: 'dd MMM yyyy' }}</td>
+          <td *ngIf="uploadProgress > 0 && transaction.uid === existingResumableObject.files[0].file.transactionUid">
+            <div class="progress upload-progress">
+              <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100" [ngStyle]="{'width': uploadProgress + '%'}">{{uploadProgress}}%</div>
+            </div>
+          </td>
+          <td *ngIf="uploadProgress === 0 || transaction.uid !== existingResumableObject.files[0].file.transactionUid" title="{{transaction.error}}" [ngClass]="{'table-active': transaction.status === 'Pending', 'table-success': transaction.status === 'Success', 'table-danger': transaction.status === 'Failed'}">{{transaction.status}}</td>
         </tr>
       </tbody>
     </table>
-    <div>
+    <div *ngIf="!uploadTransactions || uploadTransactions.length === 0">
       <i class="fas fa-envelope"></i>
       <p>No logs found</p>
     </div>
