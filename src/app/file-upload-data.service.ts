@@ -4,8 +4,14 @@ import { Injectable } from '@angular/core';
   providedIn: 'root'
 })
 export class FileUploadDataService {
-  private patientData: any = null;
-  private selectedPatientData: any = null;
+  private uplodableObject = {
+    patientData : null,
+    resumable: null
+  };
+  private selectedPatientObject = {
+    patientData: null,
+    resumable: null
+  };
 
   constructor() { }
 
@@ -13,8 +19,9 @@ export class FileUploadDataService {
    * Sets patient data
    * @param patientData All data gathered from dicom file parsing
    */
-  setPatientData(patientData) {
-    this.patientData = patientData;
+  setPatientData(patientData, resumableObject) {
+    this.uplodableObject.patientData = patientData;
+    this.uplodableObject.resumable = resumableObject;
   }
 
   /**
@@ -22,14 +29,17 @@ export class FileUploadDataService {
    * @returns Patient data
    */
   getPatientData() {
-    return this.patientData;
+    return this.uplodableObject;
   }
 
   /**
    * Clears patient data
    */
   clearPatientData() {
-    this.patientData = null;
+    this.uplodableObject = {
+      patientData : null,
+      resumable: null
+    };
   }
 
   /**
@@ -37,7 +47,8 @@ export class FileUploadDataService {
    * @param patient Selected patient object
    */
   setSelectedPatient(patient) {
-    this.selectedPatientData = patient;
+    this.selectedPatientObject.patientData = patient;
+    this.selectedPatientObject.resumable = this.uplodableObject.resumable;
   }
 
   /**
@@ -45,14 +56,17 @@ export class FileUploadDataService {
    * @returns Selected patient details
    */
   getSelectedPatient() {
-    return this.selectedPatientData;
+    return this.selectedPatientObject;
   }
 
   /**
    * Clears selected patiant details
    */
   clearSelectedPatient() {
-    this.selectedPatientData = null;
+    this.selectedPatientObject = {
+      patientData: null,
+      resumable: null
+    };
   }
 
   /**

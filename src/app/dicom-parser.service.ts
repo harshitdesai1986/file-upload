@@ -13,7 +13,7 @@ import * as dicomCharSet from '../../3rdparty/dicom-character-set/dicom-characte
 const UPLOAD_LIMIT: Number = 5368709120;
 const DICOMDIR = 'DICOMDIR';
 const dicomAttributesURL = '/assets/dicomAttributes.json';
-
+const getUuidURL = 'http://localhost:3000/uuid';
 
 @Injectable({
   providedIn: 'root'
@@ -25,6 +25,13 @@ export class DicomParserService {
   private validSopClassUid: any;
 
   constructor(private fileReaderPoolService: FileReaderPoolService, private http: HttpClient, private fileUploadDataService: FileUploadDataService) { }
+
+  /**
+   * Returns unique UUID from backend
+   */
+  getUUID() {
+    return this.http.get(getUuidURL);
+  }
 
   /**
    * Makes a GET call to read dicom attributes JSON file and returns response

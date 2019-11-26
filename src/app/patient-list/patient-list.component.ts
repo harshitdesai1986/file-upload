@@ -22,10 +22,10 @@ export class PatientListComponent implements OnInit {
 
   ngOnInit() {
     this.allData = this.fileUploadDataService.getPatientData();
-    if(!this.allData) {
+    if(!this.allData.patientData) {
       this.router.navigate(['/home']);
     } else {
-      this.populatePatientList(this.allData.patientList);
+      this.populatePatientList(this.allData.patientData.patientList);
       console.log(this.allData);
     }
     
@@ -128,7 +128,12 @@ export class PatientListComponent implements OnInit {
     this.router.navigate(['/study-list']);
   }
 
+  /**
+   * Cancels the file upload operation
+   */
   private cancelUpload() {
+    this.fileUploadDataService.clearPatientData();
+    this.fileUploadDataService.clearSelectedPatient();
     this.router.navigate(['/home']);
   }
 

@@ -138,6 +138,11 @@ body {
                 td {
                     text-align: center;
                 }
+
+                div.upload-progress {
+                    position: relative;
+                    top: 5px;
+                }
             }
         }
     }

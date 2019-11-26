@@ -24,6 +24,8 @@ export class FileUploadHomeComponent implements OnInit {
   private uploadMessage: string = "";
   private resumable: Resumable;
   private readingInProgress = false;
+  private uploadProgress: number = 0;
+  private transactionId;
 
   constructor(private router:Router, private toastr: ToastrService, private dicomParserService: DicomParserService, private fileUploadDataService: FileUploadDataService) { }
 
@@ -39,11 +41,28 @@ export class FileUploadHomeComponent implements OnInit {
       testChunks:false,
       throttleProgressCallbacks:1
     });
+
     let self = this;
-    console.log("ALready attached files ", this.resumable.files);
-    console.log("Patient Data >> ", self.fileUploadDataService.getPatientData());
+
+    this.dicomParserService.getUUID().subscribe(data => {
+      self.transactionId = data;
+    });
+    
+    console.log("Already attached files ", this.resumable.files);
+    console.log("Patient Data >> ", this.fileUploadDataService.getPatientData());
+    let patientData = this.fileUploadDataService.getPatientData();
+    if(patientData && patientData.resumable){
+      patientData.resumable.on('progress', function() {
+        self.uploadProgress = Math.round(patientData.resumable.progress(true) * 100);
+      });
+    }
+    
+    // On Files browsed using ResumableJS
     this.resumable.on('filesAdded', function(files){
       self.addedFiles = files;
+      self.resumable.files.forEach(resumableFile => {
+        resumableFile.transactionUid = self.transactionId.uid;
+      });
     });
   }
 
@@ -60,10 +79,6 @@ export class FileUploadHomeComponent implements OnInit {
     return fileList;
   }
 
-  /* startUpload() {
-    this.resumable.upload();
-  } */
-
   private startParsing() {
     console.log("attached files ", this.resumable.files);
     if(this.uploadMessage != "") {
@@ -77,7 +92,7 @@ export class FileUploadHomeComponent implements OnInit {
         this.dicomParserService.getDicomAttributes().subscribe(dicomAttributes => {
           this.dicomParserService.getPatientList(fileObjects, dicomAttributes).subscribe(patientList => {
             this.readingInProgress = false;
-            this.fileUploadDataService.setPatientData(patientList);
+            this.fileUploadDataService.setPatientData(patientList, this.resumable);
             this.router.navigate(['/patient-list']);
           },
           err => {

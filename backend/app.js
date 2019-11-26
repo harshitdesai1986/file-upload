@@ -24,7 +24,7 @@ const corsOptions = {
 app.use(cors(corsOptions));
 
 app.get('/uuid', function(req, res) {
-  res.send(uuidv1());
+  res.send({uid: uuidv1()});
 });
 
 // retrieve file id. invoke with /fileid?filename=my-file.jpg
