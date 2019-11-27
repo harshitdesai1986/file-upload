@@ -172,5 +172,28 @@ export class FileUploadDataService {
     return DOB > utcCurrentDate ? --years : years;
   }
 
+  /**
+   * Returns Gender in full form
+   * @param gender Gender in M/F/O/null
+   * @returns Gender in full form
+   */
+  getGenderInFullForm(gender) {
+    let fullFormGender: string = '';
+    switch (gender) {
+      case 'M':
+        fullFormGender = 'Male';
+        break;
+      case 'F':
+        fullFormGender = 'Female';
+        break;
+      case null:
+        fullFormGender = null;
+        break;
+      default:
+        fullFormGender = 'Other';
+        break;
+    }
+    return fullFormGender; 
+  }
 
 }

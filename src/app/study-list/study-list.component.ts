@@ -25,6 +25,11 @@ export class StudyListComponent implements OnInit {
     if(!this.selectedPatient.patientData) {
       this.router.navigate(['/home']);
     } else {
+      if(Number(this.selectedPatient.patientData.dob) !== NaN) {
+        this.selectedPatient.patientData.dob = this.datePipe.transform(this.selectedPatient.patientData.dob, 'dd MMM yyyy');
+      } else {
+        this.selectedPatient.patientData.dob = null;
+      }
       this.populateStudyList(this.selectedPatient.patientData.studyList);
       console.log(this.selectedPatient.patientData);
     }

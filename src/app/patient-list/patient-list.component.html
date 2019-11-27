@@ -36,9 +36,9 @@
                                     <span (click)="selectPatient(patient);">{{patient.name || NOT_APPLICABLE}}</span>
                                 </td>
                                 <td calss="patient-id truncate-text">{{patient.id || NOT_APPLICABLE}}</td>
-                                <td>{{patient.gender || NOT_APPLICABLE}}</td>
+                                <td>{{fileUploadDataService.getGenderInFullForm(patient.gender) || NOT_APPLICABLE}}</td>
                                 <td>{{patient.age || NOT_APPLICABLE}}</td>
-                                <td>{{patient.dob | date: 'dd MMM yyyy' || NOT_APPLICABLE}}</td>
+                                <td>{{patient.dob || NOT_APPLICABLE}}</td>
                                 <td>{{patient.studyList.length || NOT_APPLICABLE}} Studies</td>
                             </tr>
                         </tbody>

@@ -36,14 +36,17 @@ export class PatientListComponent implements OnInit {
    * @param patient Object of patient data
    */
   private calculatePatientAge(patient) {
-    if (patient.dob) {
-        let birthDate = this.fileUploadDataService.convertDateToUTC(patient.dob);
-        try {
-          patient.age = this.fileUploadDataService.calculatePatientAge(this.datePipe.transform(birthDate, 'yyyy-MM-dd', 'UTC'));
-        } catch {
-          patient.age = 'N/A';
-        }
-        
+    if (patient.dob && Number(patient.dob) !== NaN) {
+      patient.dob = this.datePipe.transform(patient.dob, 'dd MMM yyyy')
+      let birthDate = this.fileUploadDataService.convertDateToUTC(patient.dob);
+      try {
+        patient.age = this.fileUploadDataService.calculatePatientAge(this.datePipe.transform(birthDate, 'yyyy-MM-dd', 'UTC'));
+      } catch {
+        patient.age = 'N/A';
+      }
+    }
+    else {
+      patient.dob = null;
     }
   }
 

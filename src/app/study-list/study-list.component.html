@@ -27,11 +27,11 @@
             </div>
             <div class="patient-item">
                 <div class="patient-label">Gender</div>
-                <div class="patient-gender" translate="">{{selectedPatient.patientData.gender || NOT_APPLICABLE}}</div>
+                <div class="patient-gender" translate="">{{fileUploadDataService.getGenderInFullForm(selectedPatient.patientData.gender) || NOT_APPLICABLE}}</div>
             </div>
             <div class="patient-item">
                 <div class="patient-label">DOB</div>
-                <div class="patient-dob">{{selectedPatient.patientData.dob | date: 'dd MMM yyyy' || NOT_APPLICABLE}}</div>
+                <div class="patient-dob">{{selectedPatient.patientData.dob || NOT_APPLICABLE}}</div>
             </div>
             <div class="patient-item patient-item-age">
                 <div class="patient-label">Age</div>
