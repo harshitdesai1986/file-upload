@@ -172,7 +172,7 @@ export class DicomParserService {
    */
   private copyObject(original, attrs) {
     var obj = {};
-    attrs.forEach(function (attr) {
+    attrs.forEach(attr => {
         obj[attr] = original[attr];
     });
     return obj;
@@ -320,6 +320,96 @@ export class DicomParserService {
   }
 
   /**
+   * Returns Directory Record Sequence
+   * @param dataSet parsed data from dicomdir file
+   * @returns Directory record sequence
+   */
+  private getDirectoryRecordsSequence(dataSet) {
+    let element = _.find(dataSet.elements, function (element) {
+        return element.tag === 'x00041220';
+    });
+
+    return element && element.items || [];
+  }
+
+  /**
+   * Returns Directory Record Type
+   * @param dataSet parsed data from dicomdir file
+   * @returns Directory record type
+   */
+  private getDirectoryRecordType(dataSet) {
+    let element = _.find(dataSet.elements, function (element) {
+        return element.tag === 'x00041430';
+    });
+
+    if (element) {
+        return dataSet.string('x00041430');
+    }
+
+    return '';
+  }
+
+  /**
+   * Parses the DICOMDIR files and return the parsed data
+   * @param byteArray byte array with the DICOMDIR file content
+   * @returns Object having the list of patients, studies, series and images parsed
+   */
+  private parseDICOMDIRByteArray(byteArray) {
+    let patient: any = {};
+    let study: any = {};
+    let series: any = {};
+    let dataSet: any = {};
+    let dicomdir: any = {
+        patients: []
+    };
+
+    try {
+        dataSet = dicomParser.parseDicom(byteArray);
+    } catch (error) {
+        console.error('Error parsing DICOMDIR file: ' + error);
+    }
+
+    dicomdir.fileSetId = dataSet.string('x00041130');
+    dicomdir.implementationVersionName = dataSet.string('x00020013');
+
+    let items = this.getDirectoryRecordsSequence(dataSet);
+
+    items.forEach(item => {
+        let type = this.getDirectoryRecordType(item.dataSet);
+
+        if (type === 'PATIENT') {
+            patient = this.getPatientDetails(item.dataSet);
+            patient.studies = [];
+            study = null;
+            dicomdir.patients.push(patient);
+        } else if (type === 'STUDY') {
+            study = this.getStudyDetails(item.dataSet);
+            study.seriesList = [];
+            series = null;
+            patient.studies.push(study);
+        } else if (type === 'SERIES') {
+            series = {
+                modality: item.dataSet.string('x00080060'),
+                number: item.dataSet.string('x00200011'),
+                instanceUID: item.dataSet.string('x0020000e'),
+                images: []
+            };
+            study.seriesList.push(series);
+        } else if (type === 'IMAGE') {
+            let image = {
+                path: item.dataSet.string('x00041500'),
+                number: item.dataSet.string('x00200013'),
+                SOPClassUID: item.dataSet.string('x00041510'),
+                sopInstanceUid: item.dataSet.string('x00041511')
+            };
+            series.images.push(image);
+        }
+    });
+
+    return dicomdir;
+  }
+
+  /**
    * Extracts DICOMDIR files
    * @param files Total number of files to be uploaded
    * @returns An array of extracted DICOMDIR files
@@ -341,20 +431,80 @@ export class DicomParserService {
   /**
    * Parses the DICOMDIR file to retrieve patient(s), study(s) and image(s) details
    * @param dicomdirFile A dicomdir file
+   * @returns Final response having patient(s), study(s), file(s) as an observable
    */
-  private loadAndParseDICOMDIRFile(dicomdirFile) {
-    this.fileReaderPoolService.readFile(dicomdirFile).subscribe(response => {
-      console.log(response);
-      this.subject.next(response);
-      //TODO: Write code for DICOMDIR parsing
+  private loadAndParseDICOMDIRFile(dicomdirFile, files, finalResponse, subject) {
+    this.fileReaderPoolService.readFile(dicomdirFile).subscribe(fileByteArray => {
+      let filesList = files.slice(0);
+      let filesToMerge = [];
+      let dataSet: any = {};
+      let self = this;
+
+      try {
+        dataSet = this.parseDICOMDIRByteArray(fileByteArray);
+        dataSet.patients.forEach(patient => {
+          let responsePatient = this.getPatientFromPatientList(finalResponse.patientList, patient);
+
+          patient.studies.forEach(study => {
+            let responseStudy = this.getStudyFromStudyList(responsePatient.studyList, study);
+
+            study.seriesList.forEach(series => {
+              responseStudy.totalFilesFromDICOMDIR += series.images.length;
+
+              series.images.forEach(image => {
+                let file = null;
+                for (let i = 0; i < files.length && !file; i++) {
+                  if (files[i].webkitRelativePath.endsWith(image.path.replace(/\\/g, '/'))) {
+                    // if found file reference, remove it from the files list
+                    file = files[i];
+                    file.studyInstanceUid = study.studyInstanceUid;
+                    file.seriesInstanceUid = study.seriesInstanceUid;
+                    file.sopInstanceUid = image.sopInstanceUid;
+
+                    study.seriesIds = study.seriesIds || [];
+                    study.seriesIds.push(series.instanceUID);
+
+                    study.modality = study.modality || [];
+                    study.modality.push(series.modality);
+
+                    files.splice(i, 1);
+                    filesToMerge.push({ patient: patient, study: study, file: file });
+                  }
+                }
+              });
+            });
+          });
+        });
+      } catch (err) {
+        // if error, do not merge any DICOMDIR data
+        filesToMerge = [];
+
+        // restore the original files list to be parsed
+        filesList.unshift(files.length);
+        filesList.unshift(0);
+        Array.prototype.splice.apply(files, filesList);
+
+        finalResponse.notSupportedFiles.push({ file: dicomdirFile, reason: 'error-parsing-dicomdir-file' });
+      }
+
+      // merge all files found in the DICOMDIR data
+      filesToMerge.forEach(function (f) {
+        self.mergePatient(finalResponse, f.patient, f.study, f.file);
+      });
+      finalResponse.parsedFileCount += filesToMerge.length;
+
+      finalResponse.parsedFileCount++;
+      subject.next(finalResponse);
+      subject.complete();
     });
-    return this.subject.asObservable();
+    return subject.asObservable();
   }
 
   /**
    * Parses the dicom file to retrieve patient(s), study(s) and image(s) details
    * @param file A dicom file
    * @param finalResponse A final response containing patient(s) and study(s) details
+   * @returns Final response having patient(s), study(s), file(s) as an observable
    */
   private loadAndParseDICOMFile(file, finalResponse, subject) {
     this.fileReaderPoolService.readFile(file)
@@ -416,13 +566,17 @@ export class DicomParserService {
     this.setValidSopClassUid(dicomAttributes.sopClassUid);
     this.setValidTransferSyntaxUid(dicomAttributes.transferSyntaxUid);
 
-    forkJoin(files.map(function (file) {
-      return self.loadAndParseDICOMFile(file, finalResponse, subject);
+    forkJoin(dicomdirFiles.map(function (dicomdirFile) {
+      return self.loadAndParseDICOMDIRFile(dicomdirFile, files, finalResponse, subject);
     })).subscribe(() => {
-      if(finalResponse.notSupportedFiles.length === finalResponse.totalCount) {
-        subject.error('All the file(s) are unsupported!');
-      }
-      subject.next(finalResponse);
+      forkJoin(files.map(function (file) {
+        return self.loadAndParseDICOMFile(file, finalResponse, subject);
+      })).subscribe(() => {
+        if(finalResponse.notSupportedFiles.length === finalResponse.totalCount) {
+          subject.error('All the file(s) are unsupported!');
+        }
+        subject.next(finalResponse);
+      });
     });
 
     return subject.asObservable();

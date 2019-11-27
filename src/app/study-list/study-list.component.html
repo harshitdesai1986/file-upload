@@ -20,22 +20,22 @@
         </div>
         <hr>
         <div class="patient-banner">
-            <div class="patient-name ellipsis" title="{{selectedPatient.patientData.name}}">{{selectedPatient.patientData.name}}</div>
+            <div class="patient-name ellipsis" title="{{selectedPatient.patientData.name || NOT_APPLICABLE}}">{{selectedPatient.patientData.name || NOT_APPLICABLE}}</div>
             <div class="patient-item">
                 <div class="patient-label">Patient ID</div>
-                <div class="patient-id ellipsis" title="{{selectedPatient.patientData.id}}">{{selectedPatient.patientData.id}}</div>
+                <div class="patient-id ellipsis" title="{{selectedPatient.patientData.id || NOT_APPLICABLE}}">{{selectedPatient.patientData.id || NOT_APPLICABLE}}</div>
             </div>
             <div class="patient-item">
                 <div class="patient-label">Gender</div>
-                <div class="patient-gender" translate="">{{selectedPatient.patientData.gender}}</div>
+                <div class="patient-gender" translate="">{{selectedPatient.patientData.gender || NOT_APPLICABLE}}</div>
             </div>
             <div class="patient-item">
                 <div class="patient-label">DOB</div>
-                <div class="patient-dob">{{selectedPatient.patientData.dob | date: 'dd MMM yyyy'}}</div>
+                <div class="patient-dob">{{selectedPatient.patientData.dob | date: 'dd MMM yyyy' || NOT_APPLICABLE}}</div>
             </div>
             <div class="patient-item patient-item-age">
                 <div class="patient-label">Age</div>
-                <div class="patient-age" >{{selectedPatient.patientData.age}}</div>
+                <div class="patient-age" >{{selectedPatient.patientData.age || NOT_APPLICABLE}}</div>
             </div>
         </div>
         <div class="study-list-container-table">
