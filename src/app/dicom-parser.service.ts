@@ -566,9 +566,20 @@ export class DicomParserService {
     this.setValidSopClassUid(dicomAttributes.sopClassUid);
     this.setValidTransferSyntaxUid(dicomAttributes.transferSyntaxUid);
 
-    forkJoin(dicomdirFiles.map(function (dicomdirFile) {
-      return self.loadAndParseDICOMDIRFile(dicomdirFile, files, finalResponse, subject);
-    })).subscribe(() => {
+    if(dicomdirFiles.length > 0) {
+      forkJoin(dicomdirFiles.map(function (dicomdirFile) {
+        return self.loadAndParseDICOMDIRFile(dicomdirFile, files, finalResponse, subject);
+      })).subscribe(() => {
+        forkJoin(files.map(function (file) {
+          return self.loadAndParseDICOMFile(file, finalResponse, subject);
+        })).subscribe(() => {
+          if(finalResponse.notSupportedFiles.length === finalResponse.totalCount) {
+            subject.error('All the file(s) are unsupported!');
+          }
+          subject.next(finalResponse);
+        });
+      });
+    } else {
       forkJoin(files.map(function (file) {
         return self.loadAndParseDICOMFile(file, finalResponse, subject);
       })).subscribe(() => {
@@ -577,7 +588,8 @@ export class DicomParserService {
         }
         subject.next(finalResponse);
       });
-    });
+    }
+    
 
     return subject.asObservable();
      

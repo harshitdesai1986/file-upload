@@ -18,6 +18,7 @@ export class FileUploadDataService {
     patientData: null,
     resumable: null
   };
+  private resumableArray : any[] = [];
 
   constructor(private http: HttpClient) { }
 
@@ -95,6 +96,36 @@ export class FileUploadDataService {
       patientData: null,
       resumable: null
     };
+  }
+
+  /**
+   * Adds resumable object to an array
+   * @param resumable A resumable object
+   */
+  addResumableObject(resumable) {
+    this.resumableArray.push(resumable);
+  }
+
+  /**
+   * Removes resumable object from an array
+   * @param resumable A resumable object
+   */
+  removeResumableObject(resumable) {
+    let iEnd = this.resumableArray.length;
+    for (let i = 0; i < iEnd; i++) {
+      const resumableObject = this.resumableArray[i];
+      if(resumableObject.transactionUid === resumable.transactionUid) {
+        this.resumableArray.splice(i,1);
+      }
+    }
+  }
+
+  /**
+   * Returns resumable array
+   * @returns Resumable array 
+   */
+  getResumableObjects() {
+    return this.resumableArray;
   }
 
   /**

@@ -23,11 +23,10 @@ export class FileUploadHomeComponent implements OnInit {
   private addedFiles: any[] = [];
   private uploadMessage: string = "";
   private resumable: Resumable;
-  private readingInProgress = false;
-  private uploadProgress: number = 0;
-  private transactionId;
-  private uploadTransactions;
-  private existingResumableObject = null;
+  private readingInProgress: boolean = false;
+  private transactionId: any = {};
+  private resumableData: any[] = [];
+  private uploadTransactions: any = {};
 
   constructor(private router:Router, private toastr: ToastrService, private dicomParserService: DicomParserService, private fileUploadDataService: FileUploadDataService) { }
 
@@ -38,8 +37,8 @@ export class FileUploadHomeComponent implements OnInit {
   ngOnInit() {
     this.resumable = new Resumable({
       target: URL,
-      chunkSize:10*1024*1024,
-      simultaneousUploads:4,
+      chunkSize:3*1024*1024,
+      simultaneousUploads:10,
       testChunks:false,
       throttleProgressCallbacks:1
     });
@@ -50,15 +49,7 @@ export class FileUploadHomeComponent implements OnInit {
       self.transactionId = data;
     });
     
-    console.log("Already attached files ", this.resumable.files);
-    console.log("Patient Data >> ", this.fileUploadDataService.getPatientData());
-    let patientData = this.fileUploadDataService.getPatientData();
-    this.populateTransactionTable(patientData.resumable);
-    if(patientData && patientData.resumable){
-      patientData.resumable.on('progress', function() {
-        self.uploadProgress = Math.round(patientData.resumable.progress(true) * 100);
-      });
-    }
+    this.populateTransactionTable();
     
     // On Files browsed using ResumableJS
     this.resumable.on('filesAdded', function(files){
@@ -70,12 +61,33 @@ export class FileUploadHomeComponent implements OnInit {
    * Populates transaction table 
    * @param resumableObject resumable object to display upload progress or upload status
    */
-  populateTransactionTable(resumableObject) {
+  private populateTransactionTable() {
+    let self = this;
+    this.resumableData = this.fileUploadDataService.getResumableObjects();
     this.fileUploadDataService.getAllTransactions().subscribe(response => {
-      console.log("response  ", response);
-      this.uploadTransactions = response;
-      this.existingResumableObject = resumableObject;
+      this.uploadTransactions.data = response;
+      if(this.resumableData){
+        this.resumableData.forEach(resumableObject => {
+          this.uploadTransactions.data.forEach(transaction => {
+            if(transaction.uid === resumableObject.transactionUid) {
+              resumableObject.on('progress', function() {
+                transaction['uploadProgress'] = Math.round(resumableObject.progress(true) * 100);
+                if(transaction['uploadProgress'] === 100) {
+                  self.fileUploadDataService.removeResumableObject(resumableObject);
+                }
+              });
+            }
+          });
+        });
+      }
     });
+  }
+
+  /**
+   * Makes a DB call to get latest updates of transactions
+   */
+  private refreshTransactionTable() {
+    this.populateTransactionTable();
   }
 
   /**
@@ -83,7 +95,7 @@ export class FileUploadHomeComponent implements OnInit {
    * @param files Resumable File Objects
    * @returns List of file objects
    */
-  getFileObjects(files) {
+  private getFileObjects(files) {
     let fileList: Array<any> = [];
     files.forEach(file => {
       fileList.push(file.file);
@@ -106,6 +118,7 @@ export class FileUploadHomeComponent implements OnInit {
         this.dicomParserService.getDicomAttributes().subscribe(dicomAttributes => {
           this.dicomParserService.getPatientList(fileObjects, dicomAttributes).subscribe(patientList => {
             this.readingInProgress = false;
+            this.resumable.transactionUid = this.transactionId.uid;
             this.fileUploadDataService.setPatientData(patientList, this.resumable);
             this.resumable.files.forEach(resumableFile => {
               resumableFile.file.transactionUid = this.transactionId.uid;
