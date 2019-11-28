@@ -20,7 +20,7 @@ const dicomAttributesURL = '/assets/dicomAttributes.json';
 })
 export class DicomParserService {
 
-  private subject = new Subject<any>();
+  private parseProgressSubject = new Subject<any>();
   private validTransferSyntaxUid: any;
   private validSopClassUid: any;
 
@@ -410,6 +410,26 @@ export class DicomParserService {
   }
 
   /**
+   * Broadcasts a dcmProgressEvent having the total count of files to be processed and the parsed file count
+   * @param response Object having the response data to be broadcasted as an event
+   */
+  broadcastDCMProgressEvent(): Observable<any> {
+    return this.parseProgressSubject.asObservable();
+  }
+
+  /**
+   * Updates the progress of total number of parsed files
+   * @param response parsed file(s) progress response
+   */
+  private updateDCMProgress(response: any) {
+    let responseData = {
+      totalCount: response.totalCount,
+      parsedFileCount: response.parsedFileCount
+    };
+    this.parseProgressSubject.next(responseData);
+  }
+
+  /**
    * Extracts DICOMDIR files
    * @param files Total number of files to be uploaded
    * @returns An array of extracted DICOMDIR files
@@ -488,12 +508,13 @@ export class DicomParserService {
       }
 
       // merge all files found in the DICOMDIR data
-      filesToMerge.forEach(function (f) {
-        self.mergePatient(finalResponse, f.patient, f.study, f.file);
+      filesToMerge.forEach(function (file) {
+        self.mergePatient(finalResponse, file.patient, file.study, file.file);
       });
       finalResponse.parsedFileCount += filesToMerge.length;
 
-      finalResponse.parsedFileCount++;
+      this.updateDCMProgress(finalResponse);
+      
       subject.next(finalResponse);
       subject.complete();
     });
@@ -537,6 +558,7 @@ export class DicomParserService {
           finalResponse.notSupportedFiles.push({ file: file, reason: 'error-parsing-dicom-file' });
         }
         finalResponse.parsedFileCount++;
+        this.updateDCMProgress(finalResponse);
         if(finalResponse.parsedFileCount === finalResponse.totalCount) {
           subject.next(finalResponse);
           subject.complete();
@@ -590,7 +612,6 @@ export class DicomParserService {
       });
     }
     
-
     return subject.asObservable();
      
   }

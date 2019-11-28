@@ -23,7 +23,7 @@ export class FileUploadHomeComponent implements OnInit {
   private addedFiles: any[] = [];
   private uploadMessage: string = "";
   private resumable: Resumable;
-  private readingInProgress: boolean = false;
+  private parsingProgress: number = 0;
   private transactionId: any = {};
   private resumableData: any[] = [];
   private uploadTransactions: any = {};
@@ -54,6 +54,11 @@ export class FileUploadHomeComponent implements OnInit {
     // On Files browsed using ResumableJS
     this.resumable.on('filesAdded', function(files){
       self.addedFiles = files;
+    });
+
+    this.dicomParserService.broadcastDCMProgressEvent().subscribe(data => {
+      console.log("Progress  " , data.parsedFileCount, data.totalCount);
+      this.parsingProgress = Math.round((data.parsedFileCount / data.totalCount) * 100);
     });
   }
 
@@ -114,10 +119,8 @@ export class FileUploadHomeComponent implements OnInit {
         this.toastr.error('Selected File(s) size is greater than the limit!');
       }
       else {
-        this.readingInProgress = true;
         this.dicomParserService.getDicomAttributes().subscribe(dicomAttributes => {
           this.dicomParserService.getPatientList(fileObjects, dicomAttributes).subscribe(patientList => {
-            this.readingInProgress = false;
             this.resumable.transactionUid = this.transactionId.uid;
             this.fileUploadDataService.setPatientData(patientList, this.resumable);
             this.resumable.files.forEach(resumableFile => {
@@ -127,7 +130,6 @@ export class FileUploadHomeComponent implements OnInit {
             this.router.navigate(['/patient-list']);
           },
           err => {
-            this.readingInProgress = false;
             this.toastr.error(err);
           });
         });
