@@ -2,9 +2,13 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 
 const backendURL = 'http://localhost:3000';
+const upstreamURL = 'http://10.30.10.34:3001';
 const getUuidURL = backendURL + '/uuid';
 const insertTransactionURL = backendURL + '/insertTransaction';
 const getTransactionsURL = backendURL + '/getTransactions';
+const updateTransactionsURL = backendURL + '/updateTransaction';
+const initUpstreamUploadURL = upstreamURL + '/initUpload';
+
 
 @Injectable({
   providedIn: 'root'
@@ -27,6 +31,22 @@ export class FileUploadDataService {
    */
   getUUID() {
     return this.http.get(getUuidURL);
+  }
+
+  /**
+   * Makes an upstream call to initiate upstream upload 
+   * @param data transaction UID
+   */
+  postInitUpload(data) {
+    return this.http.post(initUpstreamUploadURL, data);
+  }
+
+  /**
+   * Updates the status of the transaction to failed if an error at upstream init call
+   * @param data trnsaction UID
+   */
+  updateTransactionStatus(data) {
+    return this.http.post(updateTransactionsURL, data);
   }
 
   /**

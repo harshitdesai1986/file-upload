@@ -18,7 +18,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 const corsOptions = {
-  origin: 'http://localhost:4200',
+  origin: 'http://10.30.124.98:4200',
   methods: 'GET,OPTIONS,POST',
   allowedHeaders: 'Access-Control-Allow-Headers, Origin, X-Requested-With, Content-Type, Accept',
   credentials: true,
@@ -106,6 +106,17 @@ app.get('/getTransactions', function(req, res){
     }
     res.status(200).json(results.rows);
   });
+});
+
+app.post('/updateTransaction', function(req, res) {
+  const { uid } = req.body;
+  
+  pool.query('UPDATE  transactions SET updatedby = $1, enddate = $2, updatedon = $2, status = $3, error = $4 WHERE uid = $5', ["GUEST", new Date().getTime(), "Failed", "Error occured at upstream!", uid], (error, results) => {
+    if (error) {
+      throw error;
+    }
+    res.status(201).send(results);
+  })
 });
 
 app.listen(3000);
