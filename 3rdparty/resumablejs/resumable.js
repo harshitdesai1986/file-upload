@@ -48,6 +48,8 @@
       fileNameParameterName: 'resumableFilename',
       relativePathParameterName: 'resumableRelativePath',
       totalChunksParameterName: 'resumableTotalChunks',
+      uploadTransactionUid: 'uploadTransactionUid',
+      transactionUid: null,
       throttleProgressCallbacks: 0.5,
       query:{},
       headers:{},
@@ -639,7 +641,8 @@
             ['identifierParameterName', $.fileObj.uniqueIdentifier],
             ['fileNameParameterName', $.fileObj.fileName],
             ['relativePathParameterName', $.fileObj.relativePath],
-            ['totalChunksParameterName', $.fileObj.chunks.length]
+            ['totalChunksParameterName', $.fileObj.chunks.length],
+            ['uploadTransactionUid', $.getOpt('transactionUid')]
           ].filter(function(pair){
             // include items that resolve to truthy values
             // i.e. exclude false, null, undefined and empty strings
@@ -737,6 +740,7 @@
           ['fileNameParameterName', $.fileObj.fileName],
           ['relativePathParameterName', $.fileObj.relativePath],
           ['totalChunksParameterName', $.fileObj.chunks.length],
+          ['uploadTransactionUid', $.getOpt('transactionUid')]
         ].filter(function(pair){
           // include items that resolve to truthy values
           // i.e. exclude false, null, undefined and empty strings

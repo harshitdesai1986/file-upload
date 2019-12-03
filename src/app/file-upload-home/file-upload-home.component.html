@@ -47,7 +47,7 @@
       </thead>
       <tbody>
         <tr *ngFor="let transaction of uploadTransactions.data">
-          <td>{{transaction.username}}</td>
+          <td>{{transaction.updatedby}}</td>
           <td>{{transaction.message}}</td>
           <td>{{transaction.startdate | date: 'dd MMM yyyy' }}</td>
           <td>{{transaction.enddate | date: 'dd MMM yyyy' }}</td>

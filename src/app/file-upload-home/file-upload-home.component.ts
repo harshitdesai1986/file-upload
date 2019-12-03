@@ -45,10 +45,12 @@ export class FileUploadHomeComponent implements OnInit {
 
     let self = this;
 
+    // Gets UUID from an API
     this.fileUploadDataService.getUUID().subscribe(data => {
       self.transactionId = data;
     });
     
+    // Populates transaction table
     this.populateTransactionTable();
     
     // On Files browsed using ResumableJS
@@ -56,8 +58,8 @@ export class FileUploadHomeComponent implements OnInit {
       self.addedFiles = files;
     });
 
+    // Displays file(s) parsing progress
     this.dicomParserService.broadcastDCMProgressEvent().subscribe(data => {
-      console.log("Progress  " , data.parsedFileCount, data.totalCount);
       this.parsingProgress = Math.round((data.parsedFileCount / data.totalCount) * 100);
     });
   }
@@ -80,6 +82,9 @@ export class FileUploadHomeComponent implements OnInit {
                 if(transaction['uploadProgress'] === 100) {
                   self.fileUploadDataService.removeResumableObject(resumableObject);
                 }
+              });
+              resumableObject.on('complete', function() {
+                console.log("Upload Completed!!");
               });
             }
           });

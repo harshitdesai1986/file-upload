@@ -130,6 +130,7 @@ export class StudyListComponent implements OnInit {
     this.fileUploadDataService.insertUploadTransaction(transactionData).subscribe(response => {
       if(response) {
         this.fileUploadDataService.addResumableObject(this.selectedPatient.resumable);
+        this.selectedPatient.resumable.defaults.transactionUid = transactionData.uid;
         this.selectedPatient.resumable.upload();
         this.router.navigate(['/home']);
       }

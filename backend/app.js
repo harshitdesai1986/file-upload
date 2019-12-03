@@ -49,8 +49,13 @@ app.get('/fileid', function(req, res){
 app.post('/upload', function(req, res){
     resumable.post(req, function(status, filename, original_filename, identifier){
         console.log('POST', status, original_filename, identifier);
+        let dirName = req.body['uploadTransactionUid'];
+        let dirPath = './uploads/assembled/' + dirName;
+        if (!fs.existsSync(dirPath)){
+          fs.mkdirSync(dirPath);
+        }
         if (status === 'done') {
-          var stream = fs.createWriteStream('./uploads/assembled/' + filename);
+          var stream = fs.createWriteStream(dirPath + '/' + filename);
     
           //stich the chunks
           resumable.write(identifier, stream);
@@ -86,7 +91,7 @@ app.get('/resumable.js', function (req, res) {
 app.post('/insertTransaction', function(req, res){
   const { uid, message, startdate } = req.body;
   
-  pool.query('INSERT INTO transactions (username, uid, message, startdate, status) VALUES ($1, $2, $3, $4, $5)', ["DEFAULT", uid, message, startdate, "Pending"], (error, results) => {
+  pool.query('INSERT INTO transactions (updatedby, uid, message, startdate, status) VALUES ($1, $2, $3, $4, $5)', ["GUEST", uid, message, startdate, "Pending"], (error, results) => {
     if (error) {
       throw error;
     }
