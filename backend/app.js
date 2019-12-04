@@ -1,13 +1,13 @@
-var express = require('express');
-var resumable = require('./resumable-node.js')(__dirname + "/uploads");
-var fs = require("fs"); 
-var app = express();
-var multipart = require('connect-multiparty');
-var crypto = require('crypto');
-var cors = require('cors');
+let express = require('express');
+let resumable = require('./resumable-node.js')(__dirname + "/uploads");
+let fs = require("fs"); 
+let app = express();
+let multipart = require('connect-multiparty');
+let crypto = require('crypto');
+let cors = require('cors');
 const uuidv1 = require('uuid/v1');
 const pool = require('./postgres').pool;
-var bodyParser = require('body-parser');
+let bodyParser = require('body-parser');
 
 // Host most stuff in the public folder
 app.use(express.static(__dirname + '/public'));
@@ -28,12 +28,13 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
-app.get('/uuid', function(req, res) {
+// GET API to generate UUID
+app.get('/uuid', (req, res) => {
   res.send({uid: uuidv1()});
 });
 
 // retrieve file id. invoke with /fileid?filename=my-file.jpg
-app.get('/fileid', function(req, res){
+app.get('/fileid', (req, res) => {
   if(!req.query.filename){
     return res.status(500).end('query parameter missing');
   }
@@ -46,8 +47,8 @@ app.get('/fileid', function(req, res){
 });
 
 // Handle uploads through Resumable.js
-app.post('/upload', function(req, res){
-    resumable.post(req, function(status, filename, original_filename, identifier){
+app.post('/upload', (req, res) => {
+    resumable.post(req, (status, filename, original_filename, identifier) => {
         console.log('POST', status, original_filename, identifier);
         let dirName = req.body['uploadTransactionUid'];
         let dirPath = './uploads/assembled/' + dirName;
@@ -55,7 +56,7 @@ app.post('/upload', function(req, res){
           fs.mkdirSync(dirPath);
         }
         if (status === 'done') {
-          var stream = fs.createWriteStream(dirPath + '/' + filename);
+          let stream = fs.createWriteStream(dirPath + '/' + filename);
     
           //stich the chunks
           resumable.write(identifier, stream);
@@ -72,23 +73,24 @@ app.post('/upload', function(req, res){
 });
 
 // Handle status checks on chunks through Resumable.js
-app.get('/upload', function(req, res){
-    resumable.get(req, function(status, filename, original_filename, identifier){
+app.get('/upload', (req, res) => {
+    resumable.get(req, (status, filename, original_filename, identifier) => {
         console.log('GET', status);
         res.send((status == 'found' ? 200 : 404), status);
     });
 });
 
-app.get('/download/:identifier', function(req, res){
+app.get('/download/:identifier', (req, res) => {
 	resumable.write(req.params.identifier, res);
 });
-app.get('/resumable.js', function (req, res) {
-  var fs = require('fs');
+
+app.get('/resumable.js', (req, res) => {
   res.setHeader("content-type", "application/javascript");
   fs.createReadStream("../3rdparty/resumablejs/resumable.js").pipe(res);
 });
 
-app.post('/insertTransaction', function(req, res){
+// POST API to insert upload transaction in DB
+app.post('/insertTransaction', (req, res) => {
   const { uid, message, startdate } = req.body;
   
   pool.query('INSERT INTO transactions (updatedby, uid, message, startdate, status) VALUES ($1, $2, $3, $4, $5)', ["GUEST", uid, message, startdate, "Pending"], (error, results) => {
@@ -99,7 +101,8 @@ app.post('/insertTransaction', function(req, res){
   })
 });
 
-app.get('/getTransactions', function(req, res){
+// GET API to retrieve all the upload transactions
+app.get('/getTransactions', (req, res) => {
   pool.query('SELECT * FROM transactions ORDER BY startdate DESC', (error, results) => {
     if (error) {
       throw error;
@@ -108,13 +111,33 @@ app.get('/getTransactions', function(req, res){
   });
 });
 
-app.post('/updateTransaction', function(req, res) {
+// Removes the folder along with all the files inside it
+var removeDir = (dirName) => {
+  let path = './uploads/assembled/' + dirName;
+  if( fs.existsSync(path) ) {
+    fs.readdirSync(path).forEach(function(file,index){
+      let curPath = path + "/" + file;
+      if(fs.lstatSync(curPath).isDirectory()) { // recurse
+        removeDir(curPath);
+      } else { // delete file
+        fs.unlinkSync(curPath);
+      }
+    });
+    fs.rmdirSync(path);
+  }
+};
+
+// POST API to update trsanction status to Failed in DB
+app.post('/updateTransaction', (req, res) => {
   const { uid } = req.body;
   
   pool.query('UPDATE  transactions SET updatedby = $1, enddate = $2, updatedon = $2, status = $3, error = $4 WHERE uid = $5', ["GUEST", new Date().getTime(), "Failed", "Error occured at upstream!", uid], (error, results) => {
     if (error) {
       throw error;
     }
+    // Removes the folder along with all the files inside it on upstream upload failure
+    removeDir(uid);
+
     res.status(201).send(results);
   })
 });

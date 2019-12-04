@@ -65,6 +65,28 @@ export class FileUploadHomeComponent implements OnInit {
   }
 
   /**
+   * Makes an API call to initiate upstream upload process and updates transaction status in DB if any error
+   * @param resumableObject resumable object to display upload progress or upload status
+   */
+  private initUpstreamUpload(resumableObject) {
+    let self = this;
+    resumableObject.on('complete', function() {
+      let transactionData = {
+        uid: resumableObject.transactionUid
+      };
+      self.fileUploadDataService.postInitUpload(transactionData).subscribe(response => {
+        console.log("Upstream upload initiated!!");
+      }, err => {
+        console.log("Error occured at upstream!!");
+        self.fileUploadDataService.updateTransactionStatus(transactionData).subscribe(response => {
+          console.log("Status updated for the transaction ", transactionData.uid);
+          self.populateTransactionTable();
+        });
+      });
+    });
+  }
+
+  /**
    * Populates transaction table 
    * @param resumableObject resumable object to display upload progress or upload status
    */
@@ -83,21 +105,8 @@ export class FileUploadHomeComponent implements OnInit {
                   self.fileUploadDataService.removeResumableObject(resumableObject);
                 }
               });
-              resumableObject.on('complete', function() {
-                let transactionData = {
-                  uid: resumableObject.transactionUid
-                };
-                self.fileUploadDataService.postInitUpload(transactionData).subscribe(response => {
-                  console.log("Upstream upload initiated!!");
-                }, err => {
-                  console.log("Error occured at upstream!!");
-                  self.fileUploadDataService.updateTransactionStatus(transactionData).subscribe(response => {
-                    console.log("Status updated for the transaction ", transactionData.uid);
-                    self.populateTransactionTable();
-                  });
-                }
-                );
-              });
+
+              this.initUpstreamUpload(resumableObject);
             }
           });
         });
