@@ -9,6 +9,8 @@ const uuidv1 = require('uuid/v1');
 const pool = require('./postgres').pool;
 let bodyParser = require('body-parser');
 
+const BASE_UPLOAD_URL = './uploads/assembled/';
+
 // Host most stuff in the public folder
 app.use(express.static(__dirname + '/public'));
 
@@ -51,7 +53,7 @@ app.post('/upload', (req, res) => {
     resumable.post(req, (status, filename, original_filename, identifier) => {
         console.log('POST', status, original_filename, identifier);
         let dirName = req.body['uploadTransactionUid'];
-        let dirPath = './uploads/assembled/' + dirName;
+        let dirPath = BASE_UPLOAD_URL + dirName;
         if (!fs.existsSync(dirPath)){
           fs.mkdirSync(dirPath);
         }
@@ -113,7 +115,7 @@ app.get('/getTransactions', (req, res) => {
 
 // Removes the folder along with all the files inside it
 var removeDir = (dirName) => {
-  let path = './uploads/assembled/' + dirName;
+  let path = BASE_UPLOAD_URL + dirName;
   if( fs.existsSync(path) ) {
     fs.readdirSync(path).forEach(function(file,index){
       let curPath = path + "/" + file;
