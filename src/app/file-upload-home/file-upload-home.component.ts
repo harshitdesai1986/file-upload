@@ -101,12 +101,11 @@ export class FileUploadHomeComponent implements OnInit {
             if(transaction.uid === resumableObject.transactionUid) {
               resumableObject.on('progress', function() {
                 transaction['uploadProgress'] = Math.round(resumableObject.progress(true) * 100);
-                if(transaction['uploadProgress'] === 100) {
+                if(transaction['uploadProgress'] === 100 && !resumableObject.isUploading()) {
+                  self.initUpstreamUpload(resumableObject);
                   self.fileUploadDataService.removeResumableObject(resumableObject);
                 }
               });
-
-              this.initUpstreamUpload(resumableObject);
             }
           });
         });

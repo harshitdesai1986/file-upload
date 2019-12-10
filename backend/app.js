@@ -20,7 +20,8 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 const corsOptions = {
-  origin: 'http://10.30.124.98:4200',
+  origin: 'http://10.30.124.46:4200',
+  //origin: '*',
   methods: 'GET,OPTIONS,POST',
   allowedHeaders: 'Access-Control-Allow-Headers, Origin, X-Requested-With, Content-Type, Accept',
   credentials: true,

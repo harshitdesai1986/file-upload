@@ -133,8 +133,7 @@ export class FileUploadDataService {
   removeResumableObject(resumable) {
     let iEnd = this.resumableArray.length;
     for (let i = 0; i < iEnd; i++) {
-      const resumableObject = this.resumableArray[i];
-      if(resumableObject.transactionUid === resumable.transactionUid) {
+      if(resumable && (resumable.transactionUid === this.resumableArray[i].transactionUid)) {
         this.resumableArray.splice(i,1);
       }
     }
