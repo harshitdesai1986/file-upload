@@ -70,18 +70,16 @@ export class FileUploadHomeComponent implements OnInit {
    */
   private initUpstreamUpload(resumableObject) {
     let self = this;
-    resumableObject.on('complete', function() {
-      let transactionData = {
-        uid: resumableObject.transactionUid
-      };
-      self.fileUploadDataService.postInitUpload(transactionData).subscribe(response => {
-        console.log("Upstream upload initiated!!");
-      }, err => {
-        console.log("Error occured at upstream!!");
-        self.fileUploadDataService.updateTransactionStatus(transactionData).subscribe(response => {
-          console.log("Status updated for the transaction ", transactionData.uid);
-          self.populateTransactionTable();
-        });
+    let transactionData = {
+      uid: resumableObject.transactionUid
+    };
+    self.fileUploadDataService.postInitUpload(transactionData).subscribe(response => {
+      console.log("Upstream upload initiated!!");
+    }, err => {
+      console.log("Error occured at upstream!!");
+      self.fileUploadDataService.updateTransactionStatus(transactionData).subscribe(response => {
+        console.log("Status updated for the transaction ", transactionData.uid);
+        self.populateTransactionTable();
       });
     });
   }
