@@ -139,7 +139,10 @@ export class FileUploadHomeComponent implements OnInit {
       let fileObjects = this.getFileObjects(this.addedFiles);
       let verifyTotalUploadSize = this.dicomParserService.isUploadSizeGreaterThanTheLimit(fileObjects);
       if(verifyTotalUploadSize) {
-        this.toastr.error('Selected File(s) size is greater than the limit!');
+        this.resumable.cancel();
+        this.addedFiles = [];
+        this.uploadMessage = "";
+        this.toastr.error('Selected File(s) size is greater than the upload limit of 5 GB!');
       }
       else {
         this.dicomParserService.getDicomAttributes().subscribe(dicomAttributes => {

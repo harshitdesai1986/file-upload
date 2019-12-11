@@ -26,9 +26,10 @@ export class PatientListComponent implements OnInit {
     if(!this.allData.patientData) {
       this.router.navigate(['/home']);
     } else {
-      this.toastr.warning(this.allData.patientData.notSupportedFiles.length + " non supported file(s) ignored.");
+      if(this.allData.patientData.notSupportedFiles.length > 0) {
+        this.toastr.warning(this.allData.patientData.notSupportedFiles.length + " non supported file(s) ignored.");
+      }
       this.populatePatientList(this.allData.patientData.patientList);
-      console.log(this.allData);
     }
     
   }

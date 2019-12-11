@@ -119,8 +119,6 @@ export class StudyListComponent implements OnInit {
     // Assigns only files to be uploaded to resumable onject
     this.selectedPatient.resumable.files = resumableFilesToBeUploaded;
 
-    console.log("Final set of files to be uploaded  ", this.selectedPatient.resumable.files);
-
     transactionData.uid = this.selectedPatient.resumable.files[0].file.transactionUid;
     transactionData.message = this.selectedPatient.resumable.files[0].file.uploadMessage;
     transactionData.startdate = new Date().getTime();
