@@ -168,3 +168,33 @@
         }
     }
 }
+
+@media screen and (max-height: 610px) and (max-width: 810px) {
+    .patient-list-row {
+        .patient-list-container {
+            border: 1px solid #d8d8d8;
+            border-radius: 5px;
+            background-color: #ffffff;
+            height: 552px;
+            width: 780px;
+            display: block;
+        }
+
+        .patient-list-container {
+            .patient-list-footer {
+                border-top: 1px solid #d8d8d8;
+                height: 60px;
+                position: absolute;
+                bottom: 0;
+                width: 779px;
+                align-items: center;
+                display: flex;
+            }
+
+            .patient-list-container-table {
+                max-height: 380px;
+                overflow-y: auto;
+            }
+        }
+    }
+}
