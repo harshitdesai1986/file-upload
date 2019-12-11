@@ -153,6 +153,10 @@ export class FileUploadHomeComponent implements OnInit {
             this.router.navigate(['/patient-list']);
           },
           err => {
+            this.router.navigate(['/home']);
+            this.resumable.cancel();
+            this.addedFiles = [];
+            this.uploadMessage = "";
             this.toastr.error(err);
           });
         });

@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import {Router} from "@angular/router";
 import { DatePipe } from '@angular/common';
+import { ToastrService } from 'ngx-toastr';
 
 import * as _ from 'lodash';
 
@@ -18,13 +19,14 @@ export class PatientListComponent implements OnInit {
   private patientList: any = [];
   private NOT_APPLICABLE = 'N/A';
 
-  constructor(private router:Router, private datePipe: DatePipe, private fileUploadDataService: FileUploadDataService) { }
+  constructor(private router:Router, private datePipe: DatePipe, private toastr: ToastrService, private fileUploadDataService: FileUploadDataService) { }
 
   ngOnInit() {
     this.allData = this.fileUploadDataService.getPatientData();
     if(!this.allData.patientData) {
       this.router.navigate(['/home']);
     } else {
+      this.toastr.warning(this.allData.patientData.notSupportedFiles.length + " non supported file(s) ignored.");
       this.populatePatientList(this.allData.patientData.patientList);
       console.log(this.allData);
     }
