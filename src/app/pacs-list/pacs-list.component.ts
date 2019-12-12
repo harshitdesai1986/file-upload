@@ -14,12 +14,14 @@ export class PacsListComponent implements OnInit {
   private studyList: any[] = [];
   private pacsList: any[] = [];
   private deviceSelected = false;
+  private filesToBoUploaded: any[] = [];
+
 
   constructor(private router:Router, private fileUploadDataService: FileUploadDataService) { }
 
   ngOnInit() {
     this.selectedPatient = this.fileUploadDataService.getSelectedPatient();
-    if(this.selectedPatient && this.selectedPatient.patientData.studyList) {
+    if(this.selectedPatient && this.selectedPatient.patientData) {
       this.studyList = this.selectedPatient.patientData.studyList;
     }
     if(!this.selectedPatient.patientData || this.studyList.length === 0) {
@@ -77,6 +79,18 @@ export class PacsListComponent implements OnInit {
   }
 
   /**
+   * Extracts files from study for uploading
+   * @param study A study containing dicom files
+   */
+  private getFilesToBeUploaded(study) {
+    if(study.isSelected) {
+      study.fileList.forEach(file => {
+        this.filesToBoUploaded.push(file);
+      });
+    }
+  }
+
+  /**
    * Selects/Deselects the PACS device and deselect the other available devices
    * @param selectedPacs The pacs device selected on page
    */
@@ -99,11 +113,28 @@ export class PacsListComponent implements OnInit {
    * Uploads selected study files
    */
   private uploadSelectedStudies() {
+    let resumableFilesToBeUploaded: any[] = [];
     let transactionData = {
       uid: null,
       startdate: null,
       message: null
     };
+
+    this.studyList.forEach(study => {
+      this.getFilesToBeUploaded(study);
+    });
+
+    this.filesToBoUploaded.forEach(file => {
+      let fileToBeUploaded = file;
+      this.selectedPatient.resumable.files.forEach(resumableFile => {
+        if(fileToBeUploaded.uniqueIdentifier === resumableFile.file.uniqueIdentifier) {
+          resumableFilesToBeUploaded.push(resumableFile);
+        }
+      });
+    });
+
+    // Assigns only files to be uploaded to resumable onject
+    this.selectedPatient.resumable.files = resumableFilesToBeUploaded;
     
     transactionData.uid = this.selectedPatient.resumable.files[0].file.transactionUid;
     transactionData.message = this.selectedPatient.resumable.files[0].file.uploadMessage;

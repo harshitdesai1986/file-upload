@@ -16,7 +16,12 @@ export class StudyListComponent implements OnInit {
   private studyList: any[] = [];
   private NOT_APPLICABLE = 'N/A';
   private noOfStudiesSelected: number = 0;
-  private filesToBoUploaded: any[] = [];
+  private selectedPatientName: string = "";
+  private selectedPatientId: string = "";
+  private selectedPatientDob: string = "";
+  private selectedPatientAge: string = "";
+  private selectedPatientGender: string = "";
+  private selectedPatientSelectAll: string = "";
 
   constructor(private router:Router, private datePipe: DatePipe, private fileUploadDataService: FileUploadDataService) { }
 
@@ -30,6 +35,23 @@ export class StudyListComponent implements OnInit {
       } else {
         this.selectedPatient.patientData.dob = null;
       }
+      this.selectedPatientName = this.selectedPatient && this.selectedPatient.patientData && this.selectedPatient.patientData.name ? this.selectedPatient.patientData.name : this.NOT_APPLICABLE;
+
+      this.selectedPatientId = this.selectedPatient && this.selectedPatient.patientData && this.selectedPatient.patientData.id ? this.selectedPatient.patientData.id : this.NOT_APPLICABLE;
+
+      this.selectedPatientGender = this.selectedPatient && this.selectedPatient.patientData && this.selectedPatient.patientData.gender ? this.selectedPatient.patientData.gender : this.NOT_APPLICABLE;
+
+      this.selectedPatientAge = this.selectedPatient && this.selectedPatient.patientData && this.selectedPatient.patientData.age ? this.selectedPatient.patientData.age : this.NOT_APPLICABLE;
+
+      this.selectedPatientSelectAll = this.selectedPatient && this.selectedPatient.patientData && this.selectedPatient.patientData.selectAll ? this.selectedPatient.patientData.selectAll : false;
+
+      if(this.selectedPatient && this.selectedPatient.patientData && this.selectedPatient.patientData.dob && Number(this.selectedPatient.patientData.dob) !== NaN) {
+        this.selectedPatientDob = this.datePipe.transform(this.selectedPatient.patientData.dob, 'dd MMM yyyy');
+      } else {
+        this.selectedPatientDob = this.NOT_APPLICABLE;
+      }
+
+      
       this.populateStudyList(this.selectedPatient.patientData.studyList);
       console.log(this.selectedPatient.patientData);
     }
@@ -82,39 +104,9 @@ export class StudyListComponent implements OnInit {
   }
 
   /**
-   * Extracts files from study for uploading
-   * @param study A study containing dicom files
-   */
-  private getFilesToBeUploaded(study) {
-    if(study.isSelected) {
-      study.fileList.forEach(file => {
-        this.filesToBoUploaded.push(file);
-      });
-    }
-  }
-
-  /**
    * Makes the uploadable data ready and redirects to destination selection screen
    */
   private goToDeviceSelection() {
-    let resumableFilesToBeUploaded: any[] = [];
-
-    this.studyList.forEach(study => {
-      this.getFilesToBeUploaded(study);
-    });
-
-    this.filesToBoUploaded.forEach(file => {
-      let fileToBeUploaded = file;
-      this.selectedPatient.resumable.files.forEach(resumableFile => {
-        if(fileToBeUploaded.uniqueIdentifier === resumableFile.file.uniqueIdentifier) {
-          resumableFilesToBeUploaded.push(resumableFile);
-        }
-      });
-    });
-
-    // Assigns only files to be uploaded to resumable onject
-    this.selectedPatient.resumable.files = resumableFilesToBeUploaded;
-
     this.router.navigate(['/pacs-list']);
   }
 
