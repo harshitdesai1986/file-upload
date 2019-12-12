@@ -1,0 +1,48 @@
+<div class="toolbar">
+    <h5>LOGO</h5>
+</div>
+<div class="pacs-list-row">
+    <div class="pacs-list-container">
+        <div class="pacs-container-header">
+            <ol class="breadcrumb">
+                <li>
+                    <a class="breadcrumb-text breadcrumb-link" (click)="gotoPatientList();">
+                        Patients
+                    </a>
+                </li>
+                <li>
+                    <span class="breadcrumb-text"> > </span>
+                </li>
+                <li>
+                    <a class="breadcrumb-text breadcrumb-link" (click)="gotoStudyList();">
+                        Study List
+                    </a>
+                </li>
+                <li>
+                    <span class="breadcrumb-text"> > Select Destination</span>
+                </li>
+            </ol>
+        </div>
+        <hr>
+        <br>
+        <div class="pacs-list-container-body">
+            <span class="pacs-list-container-body-title">Select PACS Device</span>
+            <br>
+            <ul>
+                <li [ngClass]="{ 'selected': pacs.isSelected }" *ngFor="let pacs of pacsList" (click)="selectDestination(pacs)">
+                    <span>{{pacs.name}}</span>
+                </li>
+            </ul>
+        </div>
+        <div class="pacs-list-footer flex centered">
+            <div class="flex-grow-proportionate">
+            </div>
+            <span>
+                <button id="upload" class="btn btn-primary btn-sm uploadBtn" type="button" [disabled]="!deviceSelected" (click)="uploadSelectedStudies()">Upload</button>
+            </span>
+            <span>
+                <button id="cancel" class="btn btn-outline-primary btn-sm cancelBtn" type="button" (click)="cancelUpload()">Cancel</button>
+            </span>
+        </div>
+    </div>
+</div>

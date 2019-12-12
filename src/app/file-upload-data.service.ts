@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 
 const backendURL = 'http://localhost:3000';
-const upstreamURL = 'http://10.30.10.34:3001';
+const upstreamURL = 'http://10.30.10.33:3001';
 const getUuidURL = backendURL + '/uuid';
 const insertTransactionURL = backendURL + '/insertTransaction';
 const getTransactionsURL = backendURL + '/getTransactions';

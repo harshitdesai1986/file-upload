@@ -94,19 +94,15 @@ export class StudyListComponent implements OnInit {
   }
 
   /**
-   * Uploads selected study files
+   * Makes the uploadable data ready and redirects to destination selection screen
    */
-  private uploadSelectedStudies() {
+  private goToDeviceSelection() {
     let resumableFilesToBeUploaded: any[] = [];
-    let transactionData = {
-      uid: null,
-      startdate: null,
-      message: null
-    };
+
     this.studyList.forEach(study => {
       this.getFilesToBeUploaded(study);
     });
-    
+
     this.filesToBoUploaded.forEach(file => {
       let fileToBeUploaded = file;
       this.selectedPatient.resumable.files.forEach(resumableFile => {
@@ -119,21 +115,7 @@ export class StudyListComponent implements OnInit {
     // Assigns only files to be uploaded to resumable onject
     this.selectedPatient.resumable.files = resumableFilesToBeUploaded;
 
-    transactionData.uid = this.selectedPatient.resumable.files[0].file.transactionUid;
-    transactionData.message = this.selectedPatient.resumable.files[0].file.uploadMessage;
-    transactionData.startdate = new Date().getTime();
-
-    console.log("transactionData   ", transactionData);
-
-    this.fileUploadDataService.insertUploadTransaction(transactionData).subscribe(response => {
-      if(response) {
-        this.fileUploadDataService.addResumableObject(this.selectedPatient.resumable);
-        this.selectedPatient.resumable.defaults.transactionUid = transactionData.uid;
-        this.selectedPatient.resumable.upload();
-        this.router.navigate(['/home']);
-      }
-    });
-    
+    this.router.navigate(['/pacs-list']);
   }
 
   /**
