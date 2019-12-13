@@ -11,7 +11,7 @@
                     </a>
                 </li>
                 <li>
-                    <span class="breadcrumb-text"> > {{selectedPatientName}}</span>
+                    <span class="breadcrumb-text"> > {{selectedPatient && selectedPatient.patientData ? selectedPatient.patientData.name : NOT_APPLICABLE}}</span>
                 </li>
             </ol>
             <div class="selectStudyMsg">
@@ -20,22 +20,22 @@
         </div>
         <hr>
         <div class="patient-banner">
-            <div class="patient-name ellipsis" title="{{selectedPatientName}}">{{selectedPatientName}}</div>
+            <div class="patient-name ellipsis" title="{{selectedPatient && selectedPatient.patientData ? selectedPatient.patientData.name : NOT_APPLICABLE}}">{{selectedPatient && selectedPatient.patientData ? selectedPatient.patientData.name : NOT_APPLICABLE}}</div>
             <div class="patient-item">
                 <div class="patient-label">Patient ID</div>
-                <div class="patient-id ellipsis" title="{{selectedPatientId}}">{{selectedPatientId}}</div>
+                <div class="patient-id ellipsis" title="{{selectedPatient && selectedPatient.patientData ? selectedPatient.patientData.id : NOT_APPLICABLE}}">{{selectedPatient && selectedPatient.patientData ? selectedPatient.patientData.id : NOT_APPLICABLE}}</div>
             </div>
             <div class="patient-item">
                 <div class="patient-label">Gender</div>
-                <div class="patient-gender" translate="">{{fileUploadDataService.getGenderInFullForm(selectedPatientGender) || NOT_APPLICABLE}}</div>
+                <div class="patient-gender" translate="">{{selectedPatient && selectedPatient.patientData ? fileUploadDataService.getGenderInFullForm(selectedPatient.patientData.gender) : NOT_APPLICABLE}}</div>
             </div>
             <div class="patient-item">
                 <div class="patient-label">DOB</div>
-                <div class="patient-dob">{{selectedPatientDob}}</div>
+                <div class="patient-dob">{{selectedPatient && selectedPatient.patientData ? selectedPatient.patientData.dob : NOT_APPLICABLE}}</div>
             </div>
             <div class="patient-item patient-item-age">
                 <div class="patient-label">Age</div>
-                <div class="patient-age" >{{selectedPatientAge}}</div>
+                <div class="patient-age" >{{selectedPatient && selectedPatient.patientData ? selectedPatient.patientData.age : NOT_APPLICABLE}}</div>
             </div>
         </div>
         <div class="study-list-container-table">
@@ -45,7 +45,7 @@
                         <thead class="study-list-table-widget-header">
                             <tr>
                                 <td class="multiselect-cell">
-                                    <input id="table-widget-select-all" type="checkbox" [checked]="selectedPatientSelectAll" (change)="toggleAll();">
+                                    <input id="table-widget-select-all" type="checkbox" [checked]="selectedPatient && selectedPatient.patientData ? selectedPatient.patientData.selectAll : false" (change)="toggleAll();">
                                 </td>
                                 <td>File Name</td>
                                 <td>Accession No</td>
