@@ -1,0 +1,4 @@
+{
+    "backendURL": "http://localhost:3000",
+    "upstreamURL": "http://10.30.10.33:3010"
+}

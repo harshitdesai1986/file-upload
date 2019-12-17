@@ -20,13 +20,13 @@ export class FileUploadHomeComponent implements OnInit {
 
   @ViewChild('browseButton', { static: false }) browseButton: ElementRef;
 
-  private addedFiles: any[] = [];
-  private uploadMessage: string = "";
+  public addedFiles: any[] = [];
+  public uploadMessage: string = "";
   private resumable: Resumable;
-  private parsingProgress: number = 0;
+  public parsingProgress: number = 0;
   private transactionId: any = {};
   private resumableData: any[] = [];
-  private uploadTransactions: any = {};
+  public uploadTransactions: any = {};
 
   constructor(private router:Router, private toastr: ToastrService, private dicomParserService: DicomParserService, private fileUploadDataService: FileUploadDataService) { }
 
@@ -114,7 +114,7 @@ export class FileUploadHomeComponent implements OnInit {
   /**
    * Makes a DB call to get latest updates of transactions
    */
-  private refreshTransactionTable() {
+  public refreshTransactionTable() {
     this.populateTransactionTable();
   }
 
@@ -134,7 +134,7 @@ export class FileUploadHomeComponent implements OnInit {
   /**
    * Starts parsing browsed files to retrieve Patient(s), Study(s) and Image(s)
    */
-  private startParsing() {
+  public startParsing() {
     if(this.uploadMessage != "") {
       let fileObjects = this.getFileObjects(this.addedFiles);
       let verifyTotalUploadSize = this.dicomParserService.isUploadSizeGreaterThanTheLimit(fileObjects);

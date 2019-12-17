@@ -12,12 +12,12 @@ import { FileUploadDataService } from '../file-upload-data.service';
 })
 export class StudyListComponent implements OnInit {
 
-  private selectedPatient = null;
-  private studyList: any[] = [];
-  private NOT_APPLICABLE = 'N/A';
-  private noOfStudiesSelected: number = 0;
+  public selectedPatient = null;
+  public studyList: any[] = [];
+  public NOT_APPLICABLE = 'N/A';
+  public noOfStudiesSelected: number = 0;
 
-  constructor(private router:Router, private datePipe: DatePipe, private fileUploadDataService: FileUploadDataService) { }
+  constructor(private router:Router, private datePipe: DatePipe, public fileUploadDataService: FileUploadDataService) { }
 
   ngOnInit() {
     this.selectedPatient = this.fileUploadDataService.getSelectedPatient();
@@ -45,7 +45,7 @@ export class StudyListComponent implements OnInit {
   /**
    * Takes user back to Patient List screen
    */
-  private gotoPatientList() {
+  public gotoPatientList() {
     this.studyList.forEach(function(study) {
       study.isSelected = false;
     });
@@ -57,7 +57,7 @@ export class StudyListComponent implements OnInit {
    * Toggles the study to be selected/deselected
    * @param study The study to be selected/deselected
    */
-  private toggleOne(study) {
+  public toggleOne(study) {
     study.isSelected = !study.isSelected;
     if(study.isSelected) {
       this.noOfStudiesSelected++;
@@ -71,7 +71,7 @@ export class StudyListComponent implements OnInit {
   /**
    * Toggles all the studies to be selected/deselected
    */
-  private toggleAll() {
+  public toggleAll() {
     let self = this;
     this.selectedPatient.patientData.selectAll = !this.selectedPatient.patientData.selectAll;
     this.noOfStudiesSelected = this.selectedPatient.patientData.selectAll ? this.selectedPatient.patientData.studyList.length : 0;
@@ -83,14 +83,14 @@ export class StudyListComponent implements OnInit {
   /**
    * Makes the uploadable data ready and redirects to destination selection screen
    */
-  private goToDeviceSelection() {
+  public goToDeviceSelection() {
     this.router.navigate(['/pacs-list']);
   }
 
   /**
    * Cancels the file upload operation
    */
-  private cancelUpload() {
+  public cancelUpload() {
     this.fileUploadDataService.clearPatientData();
     this.fileUploadDataService.clearSelectedPatient();
     this.router.navigate(['/home']);

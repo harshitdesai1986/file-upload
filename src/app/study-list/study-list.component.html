@@ -59,7 +59,7 @@
                                 <td class="multiselect-cell">
                                     <input id="table-widget-select-one" type="checkbox" [checked]="study.isSelected" (change)="toggleOne(study);">
                                 </td>
-                                <td class="study-name truncate-text" title="{{study.description || N/ANOT_APPLICABLE}}">{{study.description || NOT_APPLICABLE}}</td>
+                                <td class="study-name truncate-text" title="{{study.description || NOT_APPLICABLE}}">{{study.description || NOT_APPLICABLE}}</td>
                                 <td>{{study.accessionNumber || NOT_APPLICABLE}}</td>
                                 <td>{{study.modality || NOT_APPLICABLE}}</td>
                                 <td>{{study.studyDate | date: 'dd MMM yyyy' || NOT_APPLICABLE}}</td>

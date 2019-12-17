@@ -1,7 +1,7 @@
 # See http://help.github.com/ignore-files/ for more about ignoring files.
 
 # compiled output
-/dist
+#/dist
 /tmp
 /out-tsc
 # Only exists if Bazel was run
@@ -10,6 +10,7 @@
 # dependencies
 /node_modules
 /backend/node_modules
+/upstream/node_modules
 
 /backend/uploads
 

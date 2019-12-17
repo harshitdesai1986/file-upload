@@ -12,8 +12,8 @@ export class PacsListComponent implements OnInit {
 
   private selectedPatient = null;
   private studyList: any[] = [];
-  private pacsList: any[] = [];
-  private deviceSelected = false;
+  public pacsList: any[] = [];
+  public deviceSelected = false;
   private filesToBoUploaded: any[] = [];
 
 
@@ -59,7 +59,7 @@ export class PacsListComponent implements OnInit {
   /**
    * Takes user back to Patient List screen
    */
-  private gotoPatientList() {
+  public gotoPatientList() {
     this.studyList.forEach(function(study) {
       study.isSelected = false;
     });
@@ -70,7 +70,7 @@ export class PacsListComponent implements OnInit {
   /**
    * Takes user back to Study List screen
    */
-  private gotoStudyList() {
+  public gotoStudyList() {
     this.studyList.forEach(function(study) {
       study.isSelected = false;
     });
@@ -94,7 +94,7 @@ export class PacsListComponent implements OnInit {
    * Selects/Deselects the PACS device and deselect the other available devices
    * @param selectedPacs The pacs device selected on page
    */
-  private selectDestination(selectedPacs) {
+  public selectDestination(selectedPacs) {
     this.pacsList.forEach(pacs => {
       if(pacs.name === selectedPacs.name) {
         pacs.isSelected = !pacs.isSelected;
@@ -112,7 +112,7 @@ export class PacsListComponent implements OnInit {
   /**
    * Uploads selected study files
    */
-  private uploadSelectedStudies() {
+  public uploadSelectedStudies() {
     let resumableFilesToBeUploaded: any[] = [];
     let transactionData = {
       uid: null,
@@ -153,7 +153,7 @@ export class PacsListComponent implements OnInit {
   /**
    * Cancels the file upload operation
    */
-  private cancelUpload() {
+  public cancelUpload() {
     this.fileUploadDataService.clearPatientData();
     this.fileUploadDataService.clearSelectedPatient();
     this.router.navigate(['/home']);

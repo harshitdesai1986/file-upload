@@ -16,10 +16,10 @@ import { FileUploadDataService } from '../file-upload-data.service';
 export class PatientListComponent implements OnInit {
 
   private allData: any = null;
-  private patientList: any = [];
-  private NOT_APPLICABLE = 'N/A';
+  public patientList: any = [];
+  public NOT_APPLICABLE = 'N/A';
 
-  constructor(private router:Router, private datePipe: DatePipe, private toastr: ToastrService, private fileUploadDataService: FileUploadDataService) { }
+  constructor(private router:Router, private datePipe: DatePipe, private toastr: ToastrService, public fileUploadDataService: FileUploadDataService) { }
 
   ngOnInit() {
     this.allData = this.fileUploadDataService.getPatientData();
@@ -129,7 +129,7 @@ export class PatientListComponent implements OnInit {
    * Selects patient details, sets patient details to service method and redirects user to study list screen
    * @param patient Selected patient details
    */
-  private selectPatient(patient) {
+  public selectPatient(patient) {
     this.fileUploadDataService.setSelectedPatient(patient);
     this.router.navigate(['/study-list']);
   }
@@ -137,7 +137,7 @@ export class PatientListComponent implements OnInit {
   /**
    * Cancels the file upload operation
    */
-  private cancelUpload() {
+  public cancelUpload() {
     this.fileUploadDataService.clearPatientData();
     this.fileUploadDataService.clearSelectedPatient();
     this.router.navigate(['/home']);
