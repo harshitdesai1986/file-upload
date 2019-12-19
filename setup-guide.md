@@ -117,10 +117,14 @@ npm install -g lite-server
 5. Open terminal and execute following commands to start each application
     1. upstream
     ```javascript
+    npm install
+    
     node nodeapi.js
     ```
     2. backend
     ```javascript
+    npm install
+
     node app.js
     ```
     3. dist (Execute the command from the parent directory)
