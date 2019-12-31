@@ -114,20 +114,65 @@ npm install -g lite-server
     2. backend
     3. upstream
     4. test-data
-5. Open terminal and execute following commands to start each application
+5. Create following directories under **backend** directory
+    1. Create **uploads** directory under **backend** directory, i.e **backend\uploads**
+    2. Create **assembled** directory under **uploads** directory, i.e **backend\uploads\assembled**
+6. Replace **localhost** with IP address
+    1. ***If there is no change in Angular(Frontend) code***, do following:
+        1. **backend** directory
+            1. **postgres.js** file
+                - Replace host value **localhost** with PostgreSQL installed machine/container **IP**
+        2. **upstream** directory
+            1. **node-pgsql.js** file
+                - Replace host value **localhost** with PostgreSQL installed machine/container **IP**
+            2. **upload.js** file
+                - Replace orthancPath value **localhost** with Orthanc installed machine/container **IP**
+        3. **dist\file-upload** directory
+            1. **main-es5.58154a4bde57090b9a20.js** file
+                - Find and replace value **localhost** having port **3000** with backend Node installed machine/container **IP**
+                - Find and replace value **localhost** having port **3010** with upstream Node installed machine/container **IP**
+            2. **main-es2015.58154a4bde57090b9a20.js** file
+                - Find and replace value **localhost** having port **3000** with backend Node installed machine/container **IP**
+                - Find and replace value **localhost** having port **3010** with upstream Node installed machine/container **IP**
+    2. ***If there is a change in Angular Code***, do following:
+        1. Download/Clone the entire project from: https://github.com/harshitdesai1986/file-upload
+        2. **backend** directory
+            1. **postgres.js** file
+                - Replace host value **localhost** with PostgreSQL installed machine/container **IP**
+        3. **upstream** directory
+            1. **node-pgsql.js** file
+                - Replace host value **localhost** with PostgreSQL installed machine/container **IP**
+            2. **upload.js** file
+                - Replace orthancPath value **localhost** with Orthanc installed machine/container **IP**
+        4. **src\app** directory
+            1. **file-upload-data.service.ts** file
+                - Replace backendURL value **localhost** with backend Node installed machine/container **IP**
+                - Replace upstreamURL value **localhost** with upstream Node installed machine/container **IP**
+        5. **src\app\file-upload-home** directory
+            1. **file-upload-home.component.ts** file
+                - Replace URL value **localhost** with backend Node installed machine/container **IP**
+        6. Follow step 3.2, to install **Angular 8 CLI**
+        7. Execute following in terminal/CMD at **file-upload** directory
+        ```javascript
+        npm install // Execute this command only on fresh setup
+
+        ng build --prod // Execute this command only on fresh setup
+        ```
+        **PS.** *ng build --prod* command would create/update **dist/file-upload** with updated code and IP addresses.         
+7. Open terminal and execute following commands to start each application
     1. upstream
     ```javascript
-    npm install
+    npm install // Execute this command only on fresh setup
     
     node nodeapi.js
     ```
     2. backend
     ```javascript
-    npm install
+    npm install // Execute this command only on fresh setup
 
     node app.js
     ```
-    3. dist (Execute the command from the parent directory)
+    3. dist (Execute the command from the main project directory)
     ```javascript
     lite-server --baseDir="dist/file-upload"
     ```
