@@ -111,9 +111,10 @@ npm install -g lite-server
 4. Copy following directories from below GITHUB location to one of the parent directory of your own in your local machine
     - Link: https://github.com/harshitdesai1986/file-upload
     1. dist
-    2. backend
-    3. upstream
-    4. test-data
+    2. lite-server-config
+    3. backend
+    4. upstream
+    5. test-data
 5. Create following directories under **backend** directory
     1. Create **uploads** directory under **backend** directory, i.e **backend\uploads**
     2. Create **assembled** directory under **uploads** directory, i.e **backend\uploads\assembled**
@@ -172,8 +173,8 @@ npm install -g lite-server
 
     node app.js
     ```
-    3. dist (Execute the command from the main project directory)
+    3. dist (Execute the command from the parent directory of **dist**)
     ```javascript
-    lite-server --baseDir="dist/file-upload"
+    lite-server -c lite-server-config/bs-config.json
     ```
     **PS.** This will start the Angular(Frontend) application in your default browser on port 3001 
