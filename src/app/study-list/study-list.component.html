@@ -1,6 +1,3 @@
-<div class="toolbar">
-    <h5>LOGO</h5>
-</div>
 <div class="study-list-row">
     <div class="study-list-container">
         <div class="study-container-header">
@@ -11,7 +8,8 @@
                     </a>
                 </li>
                 <li>
-                    <span class="breadcrumb-text"> > {{selectedPatient && selectedPatient.patientData ? selectedPatient.patientData.name : NOT_APPLICABLE}}</span>
+                    <span class="breadcrumb-text"> >
+                        {{selectedPatient && selectedPatient.patientData ? selectedPatient.patientData.name : NOT_APPLICABLE}}</span>
                 </li>
             </ol>
             <div class="selectStudyMsg">
@@ -20,22 +18,34 @@
         </div>
         <hr>
         <div class="patient-banner">
-            <div class="patient-name ellipsis" title="{{selectedPatient && selectedPatient.patientData ? selectedPatient.patientData.name : NOT_APPLICABLE}}">{{selectedPatient && selectedPatient.patientData ? selectedPatient.patientData.name : NOT_APPLICABLE}}</div>
+            <div class="patient-name ellipsis"
+                title="{{selectedPatient && selectedPatient.patientData ? selectedPatient.patientData.name : NOT_APPLICABLE}}">
+                {{selectedPatient && selectedPatient.patientData ? selectedPatient.patientData.name : NOT_APPLICABLE}}
+            </div>
             <div class="patient-item">
                 <div class="patient-label">Patient ID</div>
-                <div class="patient-id ellipsis" title="{{selectedPatient && selectedPatient.patientData ? selectedPatient.patientData.id : NOT_APPLICABLE}}">{{selectedPatient && selectedPatient.patientData ? selectedPatient.patientData.id : NOT_APPLICABLE}}</div>
+                <div class="patient-id ellipsis"
+                    title="{{selectedPatient && selectedPatient.patientData ? selectedPatient.patientData.id : NOT_APPLICABLE}}">
+                    {{selectedPatient && selectedPatient.patientData ? selectedPatient.patientData.id : NOT_APPLICABLE}}
+                </div>
             </div>
             <div class="patient-item">
                 <div class="patient-label">Gender</div>
-                <div class="patient-gender" translate="">{{selectedPatient && selectedPatient.patientData ? fileUploadDataService.getGenderInFullForm(selectedPatient.patientData.gender) : NOT_APPLICABLE}}</div>
+                <div class="patient-gender" translate="">
+                    {{selectedPatient && selectedPatient.patientData ? fileUploadDataService.getGenderInFullForm(selectedPatient.patientData.gender) : NOT_APPLICABLE}}
+                </div>
             </div>
             <div class="patient-item">
                 <div class="patient-label">DOB</div>
-                <div class="patient-dob">{{selectedPatient && selectedPatient.patientData ? selectedPatient.patientData.dob : NOT_APPLICABLE}}</div>
+                <div class="patient-dob">
+                    {{selectedPatient && selectedPatient.patientData ? selectedPatient.patientData.dob : NOT_APPLICABLE}}
+                </div>
             </div>
             <div class="patient-item patient-item-age">
                 <div class="patient-label">Age</div>
-                <div class="patient-age" >{{selectedPatient && selectedPatient.patientData ? selectedPatient.patientData.age : NOT_APPLICABLE}}</div>
+                <div class="patient-age">
+                    {{selectedPatient && selectedPatient.patientData ? selectedPatient.patientData.age : NOT_APPLICABLE}}
+                </div>
             </div>
         </div>
         <div class="study-list-container-table">
@@ -45,7 +55,9 @@
                         <thead class="study-list-table-widget-header">
                             <tr>
                                 <td class="multiselect-cell">
-                                    <input id="table-widget-select-all" type="checkbox" [checked]="selectedPatient && selectedPatient.patientData ? selectedPatient.patientData.selectAll : false" (change)="toggleAll();">
+                                    <input id="table-widget-select-all" type="checkbox"
+                                        [checked]="selectedPatient && selectedPatient.patientData ? selectedPatient.patientData.selectAll : false"
+                                        (change)="toggleAll();">
                                 </td>
                                 <td>File Name</td>
                                 <td>Accession No</td>
@@ -57,9 +69,11 @@
                         <tbody>
                             <tr class="study-list-table-widget-row" *ngFor="let study of studyList">
                                 <td class="multiselect-cell">
-                                    <input id="table-widget-select-one" type="checkbox" [checked]="study.isSelected" (change)="toggleOne(study);">
+                                    <input id="table-widget-select-one" type="checkbox" [checked]="study.isSelected"
+                                        (change)="toggleOne(study);">
                                 </td>
-                                <td class="study-name truncate-text" title="{{study.description || NOT_APPLICABLE}}">{{study.description || NOT_APPLICABLE}}</td>
+                                <td class="study-name truncate-text" title="{{study.description || NOT_APPLICABLE}}">
+                                    {{study.description || NOT_APPLICABLE}}</td>
                                 <td>{{study.accessionNumber || NOT_APPLICABLE}}</td>
                                 <td>{{study.modality || NOT_APPLICABLE}}</td>
                                 <td>{{study.studyDate | date: 'dd MMM yyyy' || NOT_APPLICABLE}}</td>
@@ -75,13 +89,13 @@
             <div class="flex-grow-proportionate">
             </div>
             <span>
-                <button id="attachStudies" class="btn btn-primary btn-sm attachStudiesBtn" type="button" [disabled]="noOfStudiesSelected === 0" (click)="goToDeviceSelection()">Select Device</button>
+                <button id="attachStudies" class="btn btn-primary btn-sm attachStudiesBtn" type="button"
+                    [disabled]="noOfStudiesSelected === 0" (click)="goToDeviceSelection()">Select Device</button>
             </span>
             <span>
-                <button id="cancel" class="btn btn-outline-primary btn-sm cancelBtn" type="button" (click)="cancelUpload()">Cancel</button>
+                <button id="cancel" class="btn btn-outline-primary btn-sm cancelBtn" type="button"
+                    (click)="cancelUpload()">Cancel</button>
             </span>
         </div>
     </div>
 </div>
-
-<router-outlet></router-outlet>
