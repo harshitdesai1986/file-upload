@@ -129,10 +129,10 @@ npm install -g lite-server
             2. **upload.js** file
                 - Replace orthancPath value **localhost** with Orthanc installed machine/container **IP**
         3. **dist\file-upload** directory
-            1. **main-es5.58154a4bde57090b9a20.js** file
+            1. **main-es5.2d283fbf395cbd9f6e80.js** file
                 - Find and replace value **localhost** having port **3000** with backend Node installed machine/container **IP**
                 - Find and replace value **localhost** having port **3010** with upstream Node installed machine/container **IP**
-            2. **main-es2015.58154a4bde57090b9a20.js** file
+            2. **main-es2015.2d283fbf395cbd9f6e80.js** file
                 - Find and replace value **localhost** having port **3000** with backend Node installed machine/container **IP**
                 - Find and replace value **localhost** having port **3010** with upstream Node installed machine/container **IP**
     2. ***If there is a change in Angular Code***, do following:
