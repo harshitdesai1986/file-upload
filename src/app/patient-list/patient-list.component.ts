@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import {Router} from "@angular/router";
+import { Router } from "@angular/router";
 import { DatePipe } from '@angular/common';
 import { ToastrService } from 'ngx-toastr';
 
@@ -19,19 +19,14 @@ export class PatientListComponent implements OnInit {
   public patientList: any = [];
   public NOT_APPLICABLE = 'N/A';
 
-  constructor(private router:Router, private datePipe: DatePipe, private toastr: ToastrService, public fileUploadDataService: FileUploadDataService) { }
+  constructor(private router: Router, private datePipe: DatePipe, private toastr: ToastrService, public fileUploadDataService: FileUploadDataService) { }
 
   ngOnInit() {
     this.allData = this.fileUploadDataService.getPatientData();
-    if(!this.allData.patientData) {
-      this.router.navigate(['/home']);
-    } else {
-      if(this.allData.patientData.notSupportedFiles.length > 0) {
-        this.toastr.warning(this.allData.patientData.notSupportedFiles.length + " non supported file(s) ignored.");
-      }
-      this.populatePatientList(this.allData.patientData.patientList);
+    if (this.allData.patientData.notSupportedFiles.length > 0) {
+      this.toastr.warning(this.allData.patientData.notSupportedFiles.length + " non supported file(s) ignored.");
     }
-    
+    this.populatePatientList(this.allData.patientData.patientList);
   }
 
   /**
@@ -63,11 +58,11 @@ export class PatientListComponent implements OnInit {
     let withNoFiles: any[] = [];
 
     studyList.forEach(function (study) {
-        if (study.fileList.length > 0) {
-            withFiles.push(study);
-        } else {
-            withNoFiles.push(study);
-        }
+      if (study.fileList.length > 0) {
+        withFiles.push(study);
+      } else {
+        withNoFiles.push(study);
+      }
     });
 
     patient.studyList = withFiles;
@@ -83,9 +78,9 @@ export class PatientListComponent implements OnInit {
     input = +input;
     if (input) {
       let k = 1024,
-          dm = 2,
-          sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'],
-          i = Math.floor(Math.log(input) / Math.log(k));
+        dm = 2,
+        sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'],
+        i = Math.floor(Math.log(input) / Math.log(k));
       return (input / Math.pow(k, i)).toFixed(dm) + ' ' + sizes[i];
     }
 
@@ -99,15 +94,15 @@ export class PatientListComponent implements OnInit {
     let fileListSizes;
     let self = this;
     _.each(this.patientList, function (currPatient) {
-        _.each(currPatient.allStudies, function (currStudy) {
-            fileListSizes = _.sum(_.map(currStudy.fileList, function (currFile) {
-                return currFile.size;
-            }));
-            currStudy.size = self.formatBytes(fileListSizes);
-        });
+      _.each(currPatient.allStudies, function (currStudy) {
+        fileListSizes = _.sum(_.map(currStudy.fileList, function (currFile) {
+          return currFile.size;
+        }));
+        currStudy.size = self.formatBytes(fileListSizes);
+      });
     });
   }
-  
+
   /**
    * Populates patient data after data manipulation
    * @param patientObject Object of Patient Data
@@ -115,11 +110,11 @@ export class PatientListComponent implements OnInit {
   private populatePatientList(patientObject) {
     if (patientObject) {
       for (let p in patientObject) {
-          if (patientObject.hasOwnProperty(p)) {
-              this.calculatePatientAge(patientObject[p]);
-              this.splitStudyList(patientObject[p]);
-              this.patientList.push(patientObject[p]);
-          }
+        if (patientObject.hasOwnProperty(p)) {
+          this.calculatePatientAge(patientObject[p]);
+          this.splitStudyList(patientObject[p]);
+          this.patientList.push(patientObject[p]);
+        }
       }
       this.updateStudySize();
     }

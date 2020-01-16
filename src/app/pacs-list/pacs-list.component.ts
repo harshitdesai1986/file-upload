@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import {Router} from "@angular/router";
+import { Router } from "@angular/router";
 
 import { FileUploadDataService } from '../file-upload-data.service';
 
@@ -17,50 +17,47 @@ export class PacsListComponent implements OnInit {
   private filesToBoUploaded: any[] = [];
 
 
-  constructor(private router:Router, private fileUploadDataService: FileUploadDataService) { }
+  constructor(private router: Router, private fileUploadDataService: FileUploadDataService) { }
 
   ngOnInit() {
     this.selectedPatient = this.fileUploadDataService.getSelectedPatient();
-    if(this.selectedPatient && this.selectedPatient.patientData) {
+    if (this.selectedPatient && this.selectedPatient.patientData) {
       this.studyList = this.selectedPatient.patientData.studyList;
     }
-    if(!this.selectedPatient.patientData || this.studyList.length === 0) {
-      this.router.navigate(['/home']);
-    } else {
-      this.pacsList = [
-        {
-          name: 'San Ramon PACS',
-          isSelected: false
-        },
-        {
-          name: 'San Ramon EA',
-          isSelected: false
-        },
-        {
-          name: 'San Ramon CPACS',
-          isSelected: false
-        },
-        {
-          name: 'Chicago PACS',
-          isSelected: false
-        },
-        {
-          name: 'Chicago EA',
-          isSelected: false
-        },
-        {
-          name: 'Chicago CPACS',
-          isSelected: false
-        }
-      ];
-    }
+
+    this.pacsList = [
+      {
+        name: 'San Ramon PACS',
+        isSelected: false
+      },
+      {
+        name: 'San Ramon EA',
+        isSelected: false
+      },
+      {
+        name: 'San Ramon CPACS',
+        isSelected: false
+      },
+      {
+        name: 'Chicago PACS',
+        isSelected: false
+      },
+      {
+        name: 'Chicago EA',
+        isSelected: false
+      },
+      {
+        name: 'Chicago CPACS',
+        isSelected: false
+      }
+    ];
   }
 
   /**
    * Takes user back to Patient List screen
    */
   public gotoPatientList() {
-    this.studyList.forEach(function(study) {
+    this.studyList.forEach(function (study) {
       study.isSelected = false;
     });
     this.selectedPatient.patientData.selectAll = false;
@@ -71,7 +68,7 @@ export class PacsListComponent implements OnInit {
    * Takes user back to Study List screen
    */
   public gotoStudyList() {
-    this.studyList.forEach(function(study) {
+    this.studyList.forEach(function (study) {
       study.isSelected = false;
     });
     this.selectedPatient.patientData.selectAll = false;
@@ -83,7 +80,7 @@ export class PacsListComponent implements OnInit {
    * @param study A study containing dicom files
    */
   private getFilesToBeUploaded(study) {
-    if(study.isSelected) {
+    if (study.isSelected) {
       study.fileList.forEach(file => {
         this.filesToBoUploaded.push(file);
       });
@@ -96,9 +93,9 @@ export class PacsListComponent implements OnInit {
    */
   public selectDestination(selectedPacs) {
     this.pacsList.forEach(pacs => {
-      if(pacs.name === selectedPacs.name) {
+      if (pacs.name === selectedPacs.name) {
         pacs.isSelected = !pacs.isSelected;
-        if(pacs.isSelected) {
+        if (pacs.isSelected) {
           this.deviceSelected = true;
         } else {
           this.deviceSelected = false;
@@ -127,7 +124,7 @@ export class PacsListComponent implements OnInit {
     this.filesToBoUploaded.forEach(file => {
       let fileToBeUploaded = file;
       this.selectedPatient.resumable.files.forEach(resumableFile => {
-        if(fileToBeUploaded.uniqueIdentifier === resumableFile.file.uniqueIdentifier) {
+        if (fileToBeUploaded.uniqueIdentifier === resumableFile.file.uniqueIdentifier) {
           resumableFilesToBeUploaded.push(resumableFile);
         }
       });
@@ -135,13 +132,13 @@ export class PacsListComponent implements OnInit {
 
     // Assigns only files to be uploaded to resumable onject
     this.selectedPatient.resumable.files = resumableFilesToBeUploaded;
-    
+
     transactionData.uid = this.selectedPatient.resumable.files[0].file.transactionUid;
     transactionData.message = this.selectedPatient.resumable.files[0].file.uploadMessage;
     transactionData.startdate = new Date().getTime();
 
     this.fileUploadDataService.insertUploadTransaction(transactionData).subscribe(response => {
-      if(response) {
+      if (response) {
         this.fileUploadDataService.addResumableObject(this.selectedPatient.resumable);
         this.selectedPatient.resumable.defaults.transactionUid = transactionData.uid;
         this.selectedPatient.resumable.upload();

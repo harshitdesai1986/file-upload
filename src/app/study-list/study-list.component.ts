@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import {Router} from "@angular/router";
+import { Router } from "@angular/router";
 import { DatePipe } from '@angular/common';
 
 import { FileUploadDataService } from '../file-upload-data.service';
@@ -17,21 +17,19 @@ export class StudyListComponent implements OnInit {
   public NOT_APPLICABLE = 'N/A';
   public noOfStudiesSelected: number = 0;
 
-  constructor(private router:Router, private datePipe: DatePipe, public fileUploadDataService: FileUploadDataService) { }
+  constructor(private router: Router, private datePipe: DatePipe, public fileUploadDataService: FileUploadDataService) { }
 
   ngOnInit() {
     this.selectedPatient = this.fileUploadDataService.getSelectedPatient();
-    if(!this.selectedPatient.patientData) {
-      this.router.navigate(['/home']);
+
+    if (Number(this.selectedPatient.patientData.dob) !== NaN) {
+      this.selectedPatient.patientData.dob = this.datePipe.transform(this.selectedPatient.patientData.dob, 'dd MMM yyyy');
     } else {
-      if(Number(this.selectedPatient.patientData.dob) !== NaN) {
-        this.selectedPatient.patientData.dob = this.datePipe.transform(this.selectedPatient.patientData.dob, 'dd MMM yyyy');
-      } else {
-        this.selectedPatient.patientData.dob = null;
-      }
-      this.populateStudyList(this.selectedPatient.patientData.studyList);
-      console.log(this.selectedPatient.patientData);
+      this.selectedPatient.patientData.dob = null;
     }
+    this.populateStudyList(this.selectedPatient.patientData.studyList);
+    console.log(this.selectedPatient.patientData);
+
   }
 
   /**
@@ -46,7 +44,7 @@ export class StudyListComponent implements OnInit {
    * Takes user back to Patient List screen
    */
   public gotoPatientList() {
-    this.studyList.forEach(function(study) {
+    this.studyList.forEach(function (study) {
       study.isSelected = false;
     });
     this.selectedPatient.patientData.selectAll = false;
@@ -59,7 +57,7 @@ export class StudyListComponent implements OnInit {
    */
   public toggleOne(study) {
     study.isSelected = !study.isSelected;
-    if(study.isSelected) {
+    if (study.isSelected) {
       this.noOfStudiesSelected++;
     } else {
       this.noOfStudiesSelected--;
@@ -75,7 +73,7 @@ export class StudyListComponent implements OnInit {
     let self = this;
     this.selectedPatient.patientData.selectAll = !this.selectedPatient.patientData.selectAll;
     this.noOfStudiesSelected = this.selectedPatient.patientData.selectAll ? this.selectedPatient.patientData.studyList.length : 0;
-    this.studyList.forEach(function(study) {
+    this.studyList.forEach(function (study) {
       study.isSelected = self.selectedPatient.patientData.selectAll ? true : false;
     });
   }
