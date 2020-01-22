@@ -8,7 +8,7 @@ const pool = require('./node-pgsql').pool;
 let { Worker, workerData } = require('worker_threads');
 
 //const source = '//10.30.125.148//assembled'; // Shared directory location
-const source = 'C://POC//file-upload//backend//uploads//assembled';
+const source = path.join(__dirname, '..', 'backend', 'uploads', 'assembled');
 
 let cors = require('cors');
 const corsOptions = {
@@ -28,7 +28,7 @@ app.use(bodyParser.urlencoded({
 }))
 
 
-app.listen(3010, function() {
+app.listen(3010, function () {
 
     console.log('Node App is ruuning on 3010 Port');
 
@@ -38,7 +38,8 @@ app.listen(3010, function() {
 // Check for shared directory is present or not 
 var verifyDirPresence = (uid) => {
     let dirPresent = false;
-    if (fs.existsSync(source + '/' + uid)) {
+    console.log("Location   ", path.join(source, uid));
+    if (fs.existsSync(path.join(source, uid))) {
         dirPresent = true;
     }
     return dirPresent;
@@ -46,11 +47,11 @@ var verifyDirPresence = (uid) => {
 
 // POST API for getting first request from UI
 
-app.post('/initUpload', function(req, res) {
+app.post('/initUpload', function (req, res) {
     var uid = req.body.uid;
     console.log(" Transaction Id from body  " + uid);
 
-    pool.query('SELECT * FROM transactions where uid=$1', [uid], function(error) { // Check uid in body request present in DB or not
+    pool.query('SELECT * FROM transactions where uid=$1', [uid], function (error) { // Check uid in body request present in DB or not
         if (error) {
             res.status(500).send('Error occured at upstream');
         }
