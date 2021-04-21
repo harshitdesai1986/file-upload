@@ -106,7 +106,7 @@ npm install -g lite-server
 # Run/Deploy the application
 
 1. Follow step 1, to install, create and connect to **PostgreSQL** database
-2. Updated **pg_hba.conf** file at **C:\Program Files\PostgreSQL\12\data** by adding following at the bottom of the file
+2. Update **pg_hba.conf** file at **C:\Program Files\PostgreSQL\12\data** by adding following at the bottom of the file
    ```
    # TYPE  DATABASE        USER            ADDRESS                 METHOD
     host    all             all             0.0.0.0/0               md5
