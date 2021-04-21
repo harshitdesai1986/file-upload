@@ -106,19 +106,23 @@ npm install -g lite-server
 # Run/Deploy the application
 
 1. Follow step 1, to install, create and connect to **PostgreSQL** database
-2. Follow step 2, to install **Node JS** and **Orthanc**
-3. Follow step 3.3, to install **lite-server**
-4. Copy following directories from below GITHUB location to one of the parent directory of your own in your local machine
+2. Updated **pg_hba.conf** file at **C:\Program Files\PostgreSQL\12\data** by adding following at the bottom of the file
+   `# TYPE  DATABASE        USER            ADDRESS                 METHOD
+    host    all             all             0.0.0.0/0               md5`
+   Restart PostgreSQL after above updates
+3. Follow step 2, to install **Node JS** and **Orthanc**
+4. Follow step 3.3, to install **lite-server**
+5. Copy following directories from below GITHUB location to one of the parent directory of your own in your local machine
     - Link: https://github.com/harshitdesai1986/file-upload
     1. dist
     2. lite-server-config
     3. backend
     4. upstream
     5. test-data
-5. Create following directories under **backend** directory
+6. Create following directories under **backend** directory
     1. Create **uploads** directory under **backend** directory, i.e **backend\uploads**
     2. Create **assembled** directory under **uploads** directory, i.e **backend\uploads\assembled**
-6. Replace **localhost** with IP address
+7. Replace **localhost** with IP address
     1. ***If there is no change in Angular(Frontend) code***, do following:
         1. **backend** directory
             1. **postgres.js** file
