@@ -107,8 +107,10 @@ npm install -g lite-server
 
 1. Follow step 1, to install, create and connect to **PostgreSQL** database
 2. Updated **pg_hba.conf** file at **C:\Program Files\PostgreSQL\12\data** by adding following at the bottom of the file
-   `# TYPE  DATABASE        USER            ADDRESS                 METHOD
-    host    all             all             0.0.0.0/0               md5`
+   ```
+   # TYPE  DATABASE        USER            ADDRESS                 METHOD
+    host    all             all             0.0.0.0/0               md5
+   ```
    Restart PostgreSQL after above updates
 3. Follow step 2, to install **Node JS** and **Orthanc**
 4. Follow step 3.3, to install **lite-server**
